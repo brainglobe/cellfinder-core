@@ -75,10 +75,10 @@ def amend_cfg(new_model_path=None):
     print("Ensuring custom config file is correct")
 
     original_config = resource_filename(
-        "cellfinder-core", "config/cellfinder.conf"
+        "cellfinder_core", "config/cellfinder.conf"
     )
     new_config = resource_filename(
-        "cellfinder-core", "config/cellfinder.conf.custom"
+        "cellfinder_core", "config/cellfinder.conf.custom"
     )
     if new_model_path is not None:
         write_model_to_cfg(new_model_path, original_config, new_config)
