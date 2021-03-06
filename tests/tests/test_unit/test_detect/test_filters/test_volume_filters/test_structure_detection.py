@@ -4,6 +4,7 @@ import numpy as np
 
 from cellfinder_core.detect.filters.volume import structure_detection
 
+
 def test_get_non_zero_ull_min():
     assert (
         structure_detection.get_non_zero_ull_min_wrapper(list(range(10))) == 1
