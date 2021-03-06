@@ -40,11 +40,9 @@ jobs:
       - name: Test
         run: pytest
       - name: Coveralls
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-            pip install coveralls
-            coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
   # On windows, only test 3.8
   win:
@@ -66,12 +64,6 @@ jobs:
           pip install .[dev]
       - name: Test
         run: pytest
-      - name: Coveralls
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-            pip install coveralls
-            coveralls
 
   deploy-source:
     needs: [ubuntu-latest, win]
