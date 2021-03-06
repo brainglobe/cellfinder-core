@@ -49,7 +49,7 @@ jobs:
             coveralls
 
   deploy-source:
-    needs: [ubuntu-latest, win]
+    needs: test
     if: contains(github.ref, 'tags')
     runs-on: ubuntu-latest
     steps:
@@ -69,7 +69,7 @@ jobs:
 
 
   deploy-linux-wheels:
-    needs: [ubuntu-latest, win]
+    needs: test
     if: contains(github.ref, 'tags')
     runs-on: ubuntu-latest
     steps:
@@ -89,7 +89,7 @@ jobs:
         twine upload dist/*-manylinux*.whl
 
   deploy-windows-wheels:
-    needs: [ubuntu-latest, win]
+    needs: test
     if: contains(github.ref, 'tags')
     runs-on: windows-latest
     strategy:
