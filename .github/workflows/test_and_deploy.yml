@@ -66,12 +66,10 @@ jobs:
           pip install .[dev]
       - name: Test
         run: pytest
-      - name: Coveralls
-        env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-            pip install coveralls
-            coveralls
+      - name: Coveralls GitHub Action
+        uses: coverallsapp/github-action@v1.1.2
+        with:
+          -token: ${{ secrets.GITHUB_TOKEN }}
 
   deploy-source:
     needs: [ubuntu-latest, win]
