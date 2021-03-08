@@ -32,9 +32,7 @@ if platform.system() == "Windows":
     # FIXME: There must be a better way of doing this.
     base_tile_filter_extension = Extension(
         name="cellfinder_core.detect.filters.plane.base_tile_filter",
-        sources=[
-            "cellfinder_core/detect/filters/plane/" "base_tile_filter.pyx"
-        ],
+        sources=["cellfinder_core/detect/filters/plane/base_tile_filter.pyx"],
         language="c++",
     )
 
@@ -46,16 +44,14 @@ if platform.system() == "Windows":
     structure_detection_extension = Extension(
         name="cellfinder_core.detect.filters.volume.structure_detection",
         sources=[
-            "cellfinder_core/detect/filters/volume/" "structure_detection.pyx"
+            "cellfinder_core/detect/filters/volume/structure_detection.pyx"
         ],
         language="c++",
     )
 else:
     base_tile_filter_extension = Extension(
         name="cellfinder_core.detect.filters.plane.base_tile_filter",
-        sources=[
-            "cellfinder_core/detect/filters/plane/" "base_tile_filter.pyx"
-        ],
+        sources=["cellfinder_core/detect/filters/plane/base_tile_filter.pyx"],
         libraries=["m"],
         language="c++",
     )
@@ -69,7 +65,7 @@ else:
     structure_detection_extension = Extension(
         name="cellfinder_core.detect.filters.volume.structure_detection",
         sources=[
-            "cellfinder_core/detect/filters/volume/" "structure_detection.pyx"
+            "cellfinder_core/detect/filters/volume/structure_detection.pyx"
         ],
         libraries=["m"],
         language="c++",
