@@ -32,11 +32,13 @@ def prep_classification(
     return model_weights
 
 
-def prep_training(args):
-    n_processes = get_num_processes(min_free_cpu_cores=args.n_free_cpus)
+def prep_training(
+    n_free_cpus, trained_model, model_weights, install_path, model
+):
+    n_processes = get_num_processes(min_free_cpu_cores=n_free_cpus)
     prep_tensorflow(n_processes)
     model_weights = prep_models(
-        args.trained_model, args.model_weights, args.install_path, args.model
+        trained_model, model_weights, install_path, model
     )
     return model_weights
 
