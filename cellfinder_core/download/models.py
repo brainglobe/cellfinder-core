@@ -6,7 +6,7 @@ from cellfinder_core.download.download import download
 
 model_weight_urls = {
     "resnet50_tv": "https://gin.g-node.org/cellfinder/models/raw/"
-                   "master/resnet50_tv.h5",
+    "master/resnet50_tv.h5",
     "resnet50_all": "https://gin.g-node.org/cellfinder/models/raw/"
     "master/resnet50_weights.h5",
 }
