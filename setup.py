@@ -1,5 +1,5 @@
 import platform
-from setuptools import setup, find_namespace_packages, Extension
+from setuptools import setup, find_packages, Extension
 from os import path
 
 this_directory = path.abspath(path.dirname(__file__))
@@ -93,7 +93,7 @@ setup(
     },
     setup_requires=["cython"],
     python_requires=">=3.7",
-    packages=find_namespace_packages(exclude=("docs", "doc_build", "tests")),
+    packages=find_packages(),
     include_package_data=True,
     ext_modules=[
         ball_filter_extension,
