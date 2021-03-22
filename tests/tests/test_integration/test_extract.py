@@ -9,10 +9,8 @@ from tifffile import tifffile
 from imlib.cells.cells import Cell
 from imlib.IO.cells import get_cells
 
-from imlib.general.system import (
-    delete_directory_contents,
-    get_sorted_file_paths,
-)
+from imlib.general.system import delete_directory_contents
+
 from cellfinder_core.tools.IO import read_with_dask
 import cellfinder_core.extract.extract_cubes as extract_cubes
 
