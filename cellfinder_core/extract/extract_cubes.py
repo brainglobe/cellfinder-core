@@ -3,6 +3,7 @@ from collections import deque
 from concurrent.futures import ProcessPoolExecutor
 import logging
 from datetime import datetime
+from sys import getsizeof
 
 import numpy as np
 from skimage import transform
@@ -243,7 +244,8 @@ class Cube(object):
 
 def save_cubes(
     cells,
-    planes_paths,
+    signal_array,
+    background_array,
     planes_to_read,
     planes_shape,
     voxel_sizes,
@@ -256,26 +258,9 @@ def save_cubes(
     output_dir="",
     save_empty_cubes=False,
 ):
-    """
 
-    :param cells:
-    :param planes_paths:
-    :param planes_to_read:
-    :param planes_shape:
-    :param x_pix_um:
-    :param y_pix_um:
-    :param x_pix_um_network:
-    :param y_pix_um_network:
-    :param num_planes_for_cube:
-    :param cube_width:
-    :param cube_height:
-    :param cube_depth:
-    :param thread_id:
-    :param output_dir:
-    :param save_empty_cubes:
-    :return:
-    """
-    channels = list(planes_paths.keys())
+    # channels = list(planes_paths.keys())
+    channels = ["0", "1"]
     stack_shape = planes_shape + (num_planes_for_cube,)
     stacks = {}
     planes_queues = {}
@@ -283,9 +268,11 @@ def save_cubes(
         stacks[ch] = np.zeros(stack_shape, dtype=np.uint16)
         planes_queues[ch] = deque(maxlen=num_planes_for_cube)
     for plane_idx in tqdm(planes_to_read, desc="Thread: {}".format(thread_id)):
-        for ch in channels:
-            plane_path = planes_paths[ch][plane_idx]
-            planes_queues[ch].append(tifffile.imread(plane_path))
+        for ch, array in (signal_array, background_array):
+            plane_path = array[plane_idx]
+            # planes_queues[ch].append(tifffile.imread(plane_path))
+            planes_queues[ch].append(plane_path)
+
             if len(planes_queues[ch]) == num_planes_for_cube:
                 if is_even(num_planes_for_cube):
                     cell_z = int(plane_idx - num_planes_for_cube / 2 + 1)
@@ -323,7 +310,7 @@ def save_cubes(
 
 
 def get_ram_requirement_per_process(
-    single_image_path, cube_depth, num_channels=2, copies=2
+    single_image, cube_depth, num_channels=2, copies=2
 ):
     """
     Calculates how much RAM is needed per CPU core for cube extraction. Used
@@ -332,7 +319,7 @@ def get_ram_requirement_per_process(
     RAM requirement is currently:
     image_size x n_cores x n_channels x cube_depth x copies
 
-    :param single_image_path: A single 2D image, used to find the size.
+    :param single_image: A single 2D image, used to find the size.
     :param num_channels: Number of channels to be extracted
     :param cube_depth: Depth of the cube to be extracted (z-planes)
     to use.
@@ -343,7 +330,7 @@ def get_ram_requirement_per_process(
     logging.debug(
         "Determining how much RAM is needed for each CPU for cube extraction"
     )
-    file_size = os.path.getsize(single_image_path)
+    file_size = getsizeof(np.array(single_image))
     total_mem_need = file_size * num_channels * cube_depth * copies
 
     logging.debug(
@@ -365,7 +352,8 @@ def get_ram_requirement_per_process(
 def main(
     cells,
     cubes_output_dir,
-    planes_paths,
+    signal_array,
+    background_array,
     cube_depth,
     cube_width,
     cube_height,
@@ -386,17 +374,18 @@ def main(
     else:
         num_planes_needed_for_cube = cube_depth
 
-    if num_planes_needed_for_cube > len(planes_paths[0]):
+    if num_planes_needed_for_cube > len(signal_array):
         raise StackSizeError(
             "The number of planes provided is not sufficient "
             "for any cubes to be extracted. Please check the "
             "input data"
         )
 
-    first_plane = tifffile.imread(list(planes_paths.values())[0][0])
+    # first_plane = tifffile.imread(list(planes_paths.values())[0][0])
 
-    planes_shape = first_plane.shape
-    brain_depth = len(list(planes_paths.values())[0])
+    planes_shape = signal_array[0].shape
+    brain_depth = len(signal_array[0])
+    # brain_depth = len(list(planes_paths.values())[0])
 
     # TODO: use to assert all centre planes processed
     center_planes = sorted(list(set([cell.z for cell in cells])))
@@ -437,7 +426,7 @@ def main(
     # copies=2 is set because at all times there is a plane queue (deque)
     # and an array passed to `Cube`
     ram_per_process = get_ram_requirement_per_process(
-        planes_paths[0][0],
+        signal_array[0][0],
         num_planes_needed_for_cube,
         copies=2,
     )
@@ -464,7 +453,8 @@ def main(
             executor.submit(
                 save_cubes,
                 cells_groups,
-                planes_paths,
+                signal_array,
+                background_array,
                 sub_planes_to_read,
                 planes_shape,
                 voxel_sizes,

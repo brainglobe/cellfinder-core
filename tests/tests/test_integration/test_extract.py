@@ -13,6 +13,7 @@ from imlib.general.system import (
     delete_directory_contents,
     get_sorted_file_paths,
 )
+from cellfinder_core.tools.IO import read_with_dask
 import cellfinder_core.extract.extract_cubes as extract_cubes
 
 data_dir = os.path.join("tests", "data")
@@ -66,21 +67,17 @@ def load_cubes_in_dir(directory):
 
 
 def test_cube_extraction(tmpdir, depth=20):
+    signal_array = read_with_dask(signal_data_dir)
+    background_array = read_with_dask(background_data_dir)
+
     tmpdir = str(tmpdir)
     args = CubeExtractArgs(tmpdir)
-
-    planes_paths = {}
-    planes_paths[0] = get_sorted_file_paths(
-        signal_data_dir, file_extension="tif"
-    )
-    planes_paths[1] = get_sorted_file_paths(
-        background_data_dir, file_extension="tif"
-    )
 
     extract_cubes.main(
         get_cells(args.paths.cells_file_path),
         args.paths.tmp__cubes_output_dir,
-        planes_paths,
+        signal_array,
+        background_array,
         args.cube_depth,
         args.cube_width,
         args.cube_height,
@@ -108,7 +105,8 @@ def test_cube_extraction(tmpdir, depth=20):
     extract_cubes.main(
         get_cells(args.paths.cells_file_path),
         args.paths.tmp__cubes_output_dir,
-        planes_paths,
+        signal_array,
+        background_array,
         args.cube_depth,
         args.cube_width,
         args.cube_height,
@@ -161,7 +159,8 @@ def test_cube_extraction(tmpdir, depth=20):
         extract_cubes.main(
             get_cells(args.paths.cells_file_path),
             args.paths.tmp__cubes_output_dir,
-            planes_paths,
+            signal_array,
+            background_array,
             args.cube_depth,
             args.cube_width,
             args.cube_height,
