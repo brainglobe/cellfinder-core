@@ -89,7 +89,7 @@ def test_cube_extraction(tmpdir, depth=20):
     validation_cubes = load_cubes_in_dir(validate_cubes_dir)
     test_cubes = load_cubes_in_dir(tmpdir)
 
-    for idx, test_cube in enumerate(test_cubes):
+    for idx, test_cube in enumerate(validation_cubes):
         assert (validation_cubes[idx] == test_cube).all()
 
     delete_directory_contents(tmpdir)
@@ -117,7 +117,7 @@ def test_cube_extraction(tmpdir, depth=20):
 
     validation_cubes_scale = load_cubes_in_dir(validate_cubes_scale_dir)
     test_cubes = load_cubes_in_dir(tmpdir)
-    for idx, test_cube in enumerate(test_cubes):
+    for idx, test_cube in enumerate(validation_cubes):
         assert (validation_cubes_scale[idx] == test_cube).all()
 
     #  test edge of data errors
@@ -168,3 +168,6 @@ def test_cube_extraction(tmpdir, depth=20):
             args.n_free_cpus,
             args.save_empty_cubes,
         )
+
+
+test_cube_extraction("/home/adam/Desktop/test")

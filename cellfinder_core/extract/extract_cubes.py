@@ -279,7 +279,7 @@ def save_cubes(
                     )
 
                 for j, plane in enumerate(planes_queues[ch]):
-                    stacks[ch][:, :, j] = plane
+                    stacks[ch][:, :, j] = np.array(plane)
 
                 # ensures no cube_depth planes at the end
                 planes_queues[ch].popleft()
