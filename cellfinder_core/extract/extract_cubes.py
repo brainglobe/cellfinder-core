@@ -259,18 +259,15 @@ def save_cubes(
     save_empty_cubes=False,
 ):
 
-    # channels = list(planes_paths.keys())
-    channels = ["0", "1"]
     stack_shape = planes_shape + (num_planes_for_cube,)
     stacks = {}
     planes_queues = {}
-    for ch in channels:
+    for ch in (0, 1):
         stacks[ch] = np.zeros(stack_shape, dtype=np.uint16)
         planes_queues[ch] = deque(maxlen=num_planes_for_cube)
     for plane_idx in tqdm(planes_to_read, desc="Thread: {}".format(thread_id)):
         for ch, array in (signal_array, background_array):
             plane_path = array[plane_idx]
-            # planes_queues[ch].append(tifffile.imread(plane_path))
             planes_queues[ch].append(plane_path)
 
             if len(planes_queues[ch]) == num_planes_for_cube:
@@ -381,11 +378,8 @@ def main(
             "input data"
         )
 
-    # first_plane = tifffile.imread(list(planes_paths.values())[0][0])
-
     planes_shape = signal_array[0].shape
     brain_depth = len(signal_array[0])
-    # brain_depth = len(list(planes_paths.values())[0])
 
     # TODO: use to assert all centre planes processed
     center_planes = sorted(list(set([cell.z for cell in cells])))
@@ -428,7 +422,6 @@ def main(
     ram_per_process = get_ram_requirement_per_process(
         signal_array[0][0],
         num_planes_needed_for_cube,
-        copies=2,
     )
     n_processes = get_num_processes(
         min_free_cpu_cores=n_free_cpus,
