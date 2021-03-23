@@ -11,7 +11,8 @@ from imlib.general.numerical import is_even
 from cellfinder_core.extract.extract_cubes import StackSizeError
 from cellfinder_core.classify.augment import AugmentationParameters, augment
 
-
+# TODO: rename, as now using dask arrays -
+#  actually should combine to one generator
 class CubeGeneratorFromFile(Sequence):
     """
     Reads cubes (defined as e.g. xml, csv) from raw data to pass to
@@ -37,6 +38,7 @@ class CubeGeneratorFromFile(Sequence):
         cube_depth=20,
         channels=2,  # No other option currently
         classes=2,
+        extract=False,
         train=False,
         augment=False,
         augment_likelihood=0.1,
@@ -62,6 +64,9 @@ class CubeGeneratorFromFile(Sequence):
         self.cube_depth = cube_depth
         self.channels = channels
         self.classes = classes
+
+        # saving training data to file
+        self.extract = extract
 
         self.train = train
         self.augment = augment
@@ -209,6 +214,9 @@ class CubeGeneratorFromFile(Sequence):
                 batch_labels, num_classes=self.classes
             )
             return images, batch_labels
+        elif self.extract:
+            batch_info = self.__get_batch_dict(cell_batch)
+            return images, batch_info
         else:
             return images
 
@@ -286,6 +294,10 @@ class CubeGeneratorFromFile(Sequence):
         # TODO: ensure this is always the correct size
         image = zoom(image, pixel_scalings, order=self.interpolation_order)
         return image
+
+    @staticmethod
+    def __get_batch_dict(cell_batch):
+        return [cell.to_dict() for cell in cell_batch]
 
     def on_epoch_end(self):
         """
