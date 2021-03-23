@@ -8,11 +8,16 @@ from tensorflow.python.keras.utils.data_utils import Sequence
 from imlib.cells.cells import group_cells_by_z
 from imlib.general.numerical import is_even
 
-from cellfinder_core.extract.extract_cubes import StackSizeError
 from cellfinder_core.classify.augment import AugmentationParameters, augment
 
 # TODO: rename, as now using dask arrays -
 #  actually should combine to one generator
+
+
+class StackSizeError(Exception):
+    pass
+
+
 class CubeGeneratorFromFile(Sequence):
     """
     Reads cubes (defined as e.g. xml, csv) from raw data to pass to
