@@ -226,16 +226,11 @@ class CubeGeneratorFromFile(Sequence):
             return images
 
     def __get_stacks(self, index):
-        centre_z = self.batches[index][0].z
-        half_cube_depth = self.num_planes_needed_for_cube // 2
-        min_plane = centre_z - half_cube_depth
+        centre_plane = self.batches[index][0].z
 
-        if is_even(self.num_planes_needed_for_cube):
-            # WARNING: not centered because even
-            max_plane = centre_z + half_cube_depth
-        else:
-            # centered
-            max_plane = centre_z + half_cube_depth + 1
+        min_plane, max_plane = get_cube_depth_min_max(
+            centre_plane, self.num_planes_needed_for_cube
+        )
 
         signal_stack = np.array(self.signal_array[min_plane:max_plane])
         background_stack = np.array(self.background_array[min_plane:max_plane])
@@ -438,3 +433,17 @@ class CubeGeneratorFromDisk(Sequence):
         if self.augment:
             image = augment(self.augmentation_parameters, image)
         return image
+
+
+def get_cube_depth_min_max(centre_plane, num_planes_needed_for_cube):
+    half_cube_depth = num_planes_needed_for_cube // 2
+    min_plane = centre_plane - half_cube_depth
+
+    if is_even(num_planes_needed_for_cube):
+        # WARNING: not centered because even
+        max_plane = centre_plane + half_cube_depth
+    else:
+        # centered
+        max_plane = centre_plane + half_cube_depth + 1
+
+    return min_plane, max_plane
