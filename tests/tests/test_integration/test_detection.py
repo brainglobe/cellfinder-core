@@ -1,4 +1,5 @@
 import os
+import pathlib
 from math import isclose
 
 import imlib.IO.cells as cell_io
@@ -7,9 +8,15 @@ import pytest
 from cellfinder_core.main import main
 from cellfinder_core.tools.IO import read_with_dask
 
-data_dir = os.path.join(
-    os.getcwd(), "tests", "data", "integration", "detection"
-)
+data_dir = (
+    pathlib.Path(__file__)
+    / ".."
+    / ".."
+    / ".."
+    / "data"
+    / "integration"
+    / "detection"
+).resolve()
 signal_data_path = os.path.join(data_dir, "crop_planes", "ch0")
 background_data_path = os.path.join(data_dir, "crop_planes", "ch1")
 cells_validation_xml = os.path.join(data_dir, "cell_classification.xml")
