@@ -56,7 +56,14 @@ def main(
     artifact_keep=False,
     save_planes=False,
     plane_directory=None,
+    verbose=True,
 ):
+    """
+    Parameters
+    ----------
+    verbose : bool
+        If ``True`` print progress and show progress bars to the terminal.
+    """
     n_processes = get_num_processes(min_free_cpu_cores=n_free_cpus)
     start_time = datetime.now()
 
@@ -110,6 +117,7 @@ def main(
         max_cluster_size=max_cluster_size,
         outlier_keep=outlier_keep,
         artifact_keep=artifact_keep,
+        verbose=verbose,
     )
 
     # start 3D analysis (waits for planes in queue)
@@ -148,9 +156,10 @@ def main(
     cells = output_queue.get()
     bf_process.join()
 
-    print(
-        "Detection complete - all planes done in : {}".format(
-            datetime.now() - start_time
+    if verbose:
+        print(
+            "Detection complete - all planes done in : {}".format(
+                datetime.now() - start_time
+            )
         )
-    )
     return cells

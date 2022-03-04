@@ -28,11 +28,18 @@ DETECTION_TOLERANCE = 2
 # FIXME: This isn't a very good example
 
 
-@pytest.mark.slow
-def test_detection_full():
+@pytest.fixture
+def signal_array():
+    return read_with_dask(signal_data_path)
 
-    signal_array = read_with_dask(signal_data_path)
-    background_array = read_with_dask(background_data_path)
+
+@pytest.fixture
+def background_array():
+    return read_with_dask(background_data_path)
+
+
+@pytest.mark.slow
+def test_detection_full(signal_array, background_array):
 
     cells_test = main(
         signal_array,
@@ -57,3 +64,21 @@ def test_detection_full():
     assert isclose(
         num_cells_validation, num_cells_test, abs_tol=DETECTION_TOLERANCE
     )
+
+
+def test_detection_verbose(signal_array, background_array, capsys):
+    # capsys captures stdout/stderr
+    signal_array = signal_array[0:1, ...]
+    background_array = background_array[0:1, ...]
+
+    # verbose=False shouldn't emit anything to stdout
+    cells_test = main(
+        signal_array, background_array, voxel_sizes, verbose=False
+    )
+    captured = capsys.readouterr()
+    assert captured.out == ""
+
+    # verbose=True (the default) should emit feedback to stdout
+    cells_test = main(signal_array, background_array, voxel_sizes)
+    captured = capsys.readouterr()
+    assert len(captured.out) > 0

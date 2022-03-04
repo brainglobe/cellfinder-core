@@ -23,6 +23,7 @@ def main(
     model_weights,
     network_depth,
     max_workers=3,
+    verbose=True,
 ):
 
     if signal_array.ndim != 3:
@@ -60,7 +61,7 @@ def main(
         inference_generator,
         use_multiprocessing=True,
         workers=workers,
-        verbose=True,
+        verbose=verbose,
     )
     predictions = predictions.round()
     predictions = predictions.astype("uint16")

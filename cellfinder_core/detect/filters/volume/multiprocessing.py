@@ -31,7 +31,14 @@ class Mp3DFilter(object):
         max_cluster_size=5000,
         outlier_keep=False,
         artifact_keep=True,
+        verbose=True,
     ):
+        """
+        Parameters
+        ----------
+        verbose : bool
+            If ``True`` print progress and show progress bars to the terminal.
+        """
         self.data_queue = data_queue
         self.output_queue = output_queue
         self.soma_diameter = soma_diameter
@@ -51,11 +58,13 @@ class Mp3DFilter(object):
         self.ball_filter = None
         self.cell_detector = None
         self.setup_params = setup_params
+        self.verbose = verbose
 
     def process(self):
-        self.progress_bar = tqdm(
-            total=len(self.planes_paths_range), desc="Processing planes"
-        )
+        if self.verbose:
+            self.progress_bar = tqdm(
+                total=len(self.planes_paths_range), desc="Processing planes"
+            )
 
         self.ball_filter, self.cell_detector = setup(
             self.setup_params[0],
@@ -69,10 +78,12 @@ class Mp3DFilter(object):
         while True:
             plane_id, plane, mask = self.data_queue.get()
             logging.debug(f"Plane {plane_id} received for 3D filtering")
-            print(f"Plane {plane_id} received for 3D filtering")
+            if self.verbose:
+                print(f"Plane {plane_id} received for 3D filtering")
 
             if plane_id is None:
-                self.progress_bar.close()
+                if self.progress_bar is not None:
+                    self.progress_bar.close()
                 logging.debug("3D filter done")
                 cells = self.get_results()
                 self.output_queue.put(cells)

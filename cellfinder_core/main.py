@@ -37,6 +37,7 @@ def main(
     cube_height=50,
     cube_depth=20,
     network_depth="50",
+    verbose=True,
 ):
     suppress_tf_logging(tf_suppress_log_messages)
 
@@ -64,6 +65,7 @@ def main(
         n_free_cpus,
         log_sigma_size,
         n_sds_above_mean_thresh,
+        verbose=verbose,
     )
 
     model_weights = prep.prep_classification(
@@ -85,6 +87,7 @@ def main(
             trained_model,
             model_weights,
             network_depth,
+            verbose=verbose,
         )
     else:
         logging.info("No candidates, skipping classification")
