@@ -6,6 +6,7 @@ import imlib.IO.cells as cell_io
 import pytest
 
 from cellfinder_core.main import main
+from cellfinder_core.detect import DetectRunner
 from cellfinder_core.tools.IO import read_with_dask
 
 data_dir = (

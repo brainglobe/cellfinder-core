@@ -21,6 +21,7 @@ class Mp3DFilter(object):
         self,
         data_queue,
         output_queue,
+        planes_done_queue,
         soma_diameter,
         soma_size_spread_factor=1.4,
         setup_params=None,
@@ -34,6 +35,7 @@ class Mp3DFilter(object):
     ):
         self.data_queue = data_queue
         self.output_queue = output_queue
+        self.planes_done_queue = planes_done_queue
         self.soma_diameter = soma_diameter
         self.soma_size_spread_factor = soma_size_spread_factor
         self.progress_bar = None
@@ -98,9 +100,10 @@ class Mp3DFilter(object):
                     " (out of bounds)"
                 )
 
-            self.z += 1
+            self.planes_done_queue.put(self.z)
             if self.progress_bar is not None:
                 self.progress_bar.update()
+            self.z += 1
 
     def save_plane(self, plane):
         plane_name = f"plane_{str(self.z).zfill(4)}.tif"
