@@ -13,84 +13,103 @@ tf_suppress_log_messages = [
 ]
 
 
-def main(
-    signal_array,
-    background_array,
-    voxel_sizes,
-    start_plane=0,
-    end_plane=-1,
-    trained_model=None,
-    model_weights=None,
-    model="resnet50_tv",
-    batch_size=32,
-    n_free_cpus=2,
-    network_voxel_sizes=[5, 1, 1],
-    soma_diameter=16,
-    ball_xy_size=6,
-    ball_z_size=15,
-    ball_overlap_fraction=0.6,
-    log_sigma_size=0.2,
-    n_sds_above_mean_thresh=10,
-    soma_spread_factor=1.4,
-    max_cluster_size=100000,
-    cube_width=50,
-    cube_height=50,
-    cube_depth=20,
-    network_depth="50",
-):
-    suppress_tf_logging(tf_suppress_log_messages)
+class MainRunner:
+    """
+    Attributes
+    ----------
+    detect_runner : cellfinder_core.detect.DetectRunner
+    """
 
-    from pathlib import Path
+    def __init__(self):
+        from cellfinder_core.detect import DetectRunner
 
-    from cellfinder_core.classify import classify
-    from cellfinder_core.detect import detect
-    from cellfinder_core.tools import prep
+        self.detect_runner = DetectRunner()
 
-    home = Path.home()
-    install_path = home / ".cellfinder"
-    logging.info("Detecting cell candidates")
+    def __call__(self, *args, **kwargs):
+        self.run(*args, **kwargs)
+        return self.join()
 
-    points = detect.main(
+    def run(
+        self,
         signal_array,
-        start_plane,
-        end_plane,
+        background_array,
         voxel_sizes,
-        soma_diameter,
-        max_cluster_size,
-        ball_xy_size,
-        ball_z_size,
-        ball_overlap_fraction,
-        soma_spread_factor,
-        n_free_cpus,
-        log_sigma_size,
-        n_sds_above_mean_thresh,
-    )
+        start_plane=0,
+        end_plane=-1,
+        trained_model=None,
+        model_weights=None,
+        model="resnet50_tv",
+        batch_size=32,
+        n_free_cpus=2,
+        network_voxel_sizes=[5, 1, 1],
+        soma_diameter=16,
+        ball_xy_size=6,
+        ball_z_size=15,
+        ball_overlap_fraction=0.6,
+        log_sigma_size=0.2,
+        n_sds_above_mean_thresh=10,
+        soma_spread_factor=1.4,
+        max_cluster_size=100000,
+        cube_width=50,
+        cube_height=50,
+        cube_depth=20,
+        network_depth="50",
+    ):
+        suppress_tf_logging(tf_suppress_log_messages)
 
-    model_weights = prep.prep_classification(
-        trained_model, model_weights, install_path, model, n_free_cpus
-    )
-    if len(points) > 0:
-        logging.info("Running classification")
-        points = classify.main(
-            points,
+        from pathlib import Path
+
+        from cellfinder_core.classify import classify
+        from cellfinder_core.tools import prep
+
+        home = Path.home()
+        install_path = home / ".cellfinder"
+        logging.info("Detecting cell candidates")
+
+        self.points = self.detect_runner(
             signal_array,
-            background_array,
-            n_free_cpus,
+            start_plane,
+            end_plane,
             voxel_sizes,
-            network_voxel_sizes,
-            batch_size,
-            cube_height,
-            cube_width,
-            cube_depth,
-            trained_model,
-            model_weights,
-            network_depth,
+            soma_diameter,
+            max_cluster_size,
+            ball_xy_size,
+            ball_z_size,
+            ball_overlap_fraction,
+            soma_spread_factor,
+            n_free_cpus,
+            log_sigma_size,
+            n_sds_above_mean_thresh,
         )
-    else:
-        logging.info("No candidates, skipping classification")
-    return points
-    # logging.info("Saving classified cells")
-    # save_cells(points, classified_points_path)
+
+        model_weights = prep.prep_classification(
+            trained_model, model_weights, install_path, model, n_free_cpus
+        )
+        if len(self.points) > 0:
+            logging.info("Running classification")
+            self.points = classify.main(
+                self.points,
+                signal_array,
+                background_array,
+                n_free_cpus,
+                voxel_sizes,
+                network_voxel_sizes,
+                batch_size,
+                cube_height,
+                cube_width,
+                cube_depth,
+                trained_model,
+                model_weights,
+                network_depth,
+            )
+        else:
+            logging.info("No candidates, skipping classification")
+
+    def join(self):
+        return self.points
+
+
+main = MainRunner()
 
 
 def suppress_tf_logging(tf_suppress_log_messages):

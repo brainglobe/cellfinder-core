@@ -96,6 +96,7 @@ class DetectRunner:
         """
         n_processes = get_num_processes(min_free_cpu_cores=n_free_cpus)
         self.start_time = datetime.now()
+        self.signal_array = signal_array
 
         (
             soma_diameter,
@@ -186,6 +187,11 @@ class DetectRunner:
             prev_lock = lock
             self.processes.append(p)
             p.start()
+
+    @property
+    def nplanes(self):
+        """Number of planes being processed."""
+        return len(self.signal_array)
 
     def join(self):
         """
