@@ -118,7 +118,7 @@ class DetectRunner:
         workers_queue = MultiprocessingQueue(maxsize=n_processes)
         # WARNING: needs to be AT LEAST ball_z_size
         self.mp_3d_filter_queue = MultiprocessingQueue(maxsize=ball_z_size)
-        for plane_id in range(n_processes):
+        for _ in range(n_processes):
             # place holder for the queue to have the right size on first run
             workers_queue.put(None)
 
@@ -134,6 +134,7 @@ class DetectRunner:
             start_plane,
         ]
 
+        # Create 3D analysis filter
         self.mp3d_filter_output_queue = MultiprocessingQueue()
         self.mp_3d_filter = Mp3DFilter(
             self.mp_3d_filter_queue,
@@ -155,19 +156,24 @@ class DetectRunner:
         self.bf_process = multiprocessing.Process(
             target=self.mp_3d_filter.process, args=()
         )
-        self.bf_process.start()  # needs to be started before the loop
+        # needs to be started before the loop
+        self.bf_process.start()
         clipping_val, threshold_value = setup_tile_filtering(
             signal_array[0, :, :]
         )
+
+        # Create 2D analysis filter
         mp_tile_processor = MpTileProcessor(
             workers_queue, self.mp_3d_filter_queue
         )
         prev_lock = Lock()
 
         # start 2D tile filter (output goes into queue for 3D analysis)
+        # Creates a list of (running) processes for each 2D plane
         self.processes = []
         for plane_id, plane in enumerate(signal_array):
             workers_queue.get()
+            # Create a new lock for this specific plane
             lock = Lock()
             lock.acquire()
             p = multiprocessing.Process(
@@ -199,9 +205,12 @@ class DetectRunner:
 
         This will block execution until the results are ready.
         """
+        # Wait for the final 2D filter process to finish
         self.processes[-1].join()
-        self.mp_3d_filter_queue.put((None, None, None))  # Signal the end
+        # Tell 3D filter that there are no more planes left
+        self.mp_3d_filter_queue.put((None, None, None))
         cells = self.mp3d_filter_output_queue.get()
+        # Wait for 3D filter to finish
         self.bf_process.join()
 
         print(

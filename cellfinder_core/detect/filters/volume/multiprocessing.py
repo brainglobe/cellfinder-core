@@ -55,6 +55,15 @@ class Mp3DFilter(object):
         self.setup_params = setup_params
 
     def process(self):
+        """
+        Run the filter.
+
+        After setup this will process items as they are inserted into
+        ``self.data_queue``. Items in ``data_queue`` must be a tuple of
+        (plane_id: int, plane: numpy.ndarray, mask: numpy.ndarray).
+
+        To halt processing pass a tuple of `None`.
+        """
         self.progress_bar = tqdm(
             total=len(self.planes_paths_range), desc="Processing planes"
         )
