@@ -4,6 +4,7 @@ from typing import Callable, Union
 import dask
 import numpy as np
 from dask import array as da
+from dask.diagnostics import ProgressBar
 from imlib.general.system import get_num_processes
 
 from cellfinder_core.detect.filters.plane import get_tile_mask
@@ -117,11 +118,14 @@ def main(
             for plane_id, plane in enumerate(signal_array)
         ]
     )
-    tile_masks = tile_masks.compute(
-        threads_per_worker=n_processes, n_workers=1
-    )
+    logging.info("Detecting cell candidates in 2D")
+    with ProgressBar():
+        tile_masks = tile_masks.compute(
+            threads_per_worker=n_processes, n_workers=1
+        )
 
     # Create 3D analysis filter
+    logging.info("Detecting cell candidates in 2D")
     mp_3d_filter = Mp3DFilter(
         soma_diameter,
         setup_params=setup_params,
@@ -136,6 +140,7 @@ def main(
     )
 
     # Run 3D analysis
+    logging.info("Performing 3D analysis of cell candidates")
     cells = mp_3d_filter.process(tile_masks, callback=callback)
     print(
         "Detection complete - all planes done in : {}".format(
