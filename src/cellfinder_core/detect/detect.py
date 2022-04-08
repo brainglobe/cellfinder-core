@@ -1,6 +1,4 @@
-import multiprocessing
 from datetime import datetime
-from multiprocessing import Queue as MultiprocessingQueue
 from typing import Callable, Union
 
 import dask
@@ -97,8 +95,6 @@ def main(
         ball_overlap_fraction,
         start_plane,
     ]
-    output_queue: MultiprocessingQueue = MultiprocessingQueue()
-    planes_done_queue: MultiprocessingQueue = MultiprocessingQueue()
 
     clipping_val, threshold_value = setup_tile_filtering(signal_array[0, :, :])
 
@@ -126,11 +122,7 @@ def main(
     )
 
     # Create 3D analysis filter
-    mp_3d_filter_queue: MultiprocessingQueue = MultiprocessingQueue()
     mp_3d_filter = Mp3DFilter(
-        mp_3d_filter_queue,
-        output_queue,
-        planes_done_queue,
         soma_diameter,
         setup_params=setup_params,
         soma_size_spread_factor=soma_spread_factor,
@@ -142,25 +134,9 @@ def main(
         outlier_keep=outlier_keep,
         artifact_keep=artifact_keep,
     )
-    # start 3D analysis (waits for planes in queue)
-    bf_process = multiprocessing.Process(target=mp_3d_filter.process, args=())
-    bf_process.start()
-    # Fill up the 3D filter queue
-    for tile_mask in tile_masks:
-        mp_3d_filter_queue.put(tile_mask)
 
-    # Trigger callback when 3D filtering is done on a plane
-    nplanes_done = 0
-    while nplanes_done < len(signal_array):
-        callback(planes_done_queue.get(block=True))
-        nplanes_done += 1
-
-    # Tell 3D filter that there are no more planes left
-    mp_3d_filter_queue.put((None, None, None))
-    cells = output_queue.get()
-    # Wait for 3D filter to finish
-    bf_process.join()
-
+    # Run 3D analysis
+    cells = mp_3d_filter.process(tile_masks, callback=callback)
     print(
         "Detection complete - all planes done in : {}".format(
             datetime.now() - start_time
