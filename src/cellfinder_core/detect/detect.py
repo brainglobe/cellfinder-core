@@ -1,15 +1,14 @@
 import multiprocessing
 from datetime import datetime
-from multiprocessing import Lock
 from multiprocessing import Queue as MultiprocessingQueue
-from typing import Callable
+from typing import Callable, Union
 
+import dask
 import numpy as np
+from dask import array as da
 from imlib.general.system import get_num_processes
 
-from cellfinder_core.detect.filters.plane.multiprocessing import (
-    MpTileProcessor,
-)
+from cellfinder_core.detect.filters.plane import get_tile_mask
 from cellfinder_core.detect.filters.setup_filters import setup_tile_filtering
 from cellfinder_core.detect.filters.volume.multiprocessing import Mp3DFilter
 
@@ -40,7 +39,7 @@ def calculate_parameters_in_pixels(
 
 
 def main(
-    signal_array,
+    signal_array: Union[np.array, da.core.Array],
     start_plane,
     end_plane,
     voxel_sizes,
@@ -82,25 +81,13 @@ def main(
         ball_xy_size,
         ball_z_size,
     )
+    if signal_array.ndim != 3:
+        raise IOError("Input data must be 3D")
 
     if end_plane == -1:
         end_plane = len(signal_array)
     signal_array = signal_array[start_plane:end_plane]
     callback = callback or (lambda *args, **kwargs: None)
-
-    workers_queue: MultiprocessingQueue = MultiprocessingQueue(
-        maxsize=n_processes
-    )
-    # WARNING: needs to be AT LEAST ball_z_size
-    mp_3d_filter_queue: MultiprocessingQueue = MultiprocessingQueue(
-        maxsize=ball_z_size
-    )
-    for _ in range(n_processes):
-        # place holder for the queue to have the right size on first run
-        workers_queue.put(None)
-
-    if signal_array.ndim != 3:
-        raise IOError("Input data must be 3D")
 
     setup_params = [
         signal_array[0, :, :],
@@ -113,7 +100,33 @@ def main(
     output_queue: MultiprocessingQueue = MultiprocessingQueue()
     planes_done_queue: MultiprocessingQueue = MultiprocessingQueue()
 
+    clipping_val, threshold_value = setup_tile_filtering(signal_array[0, :, :])
+
+    # Do 2D filter analysis
+    get_tile_mask_delayed = dask.delayed(get_tile_mask)
+    tile_masks = dask.delayed(
+        [
+            (
+                plane_id,
+                plane,
+                get_tile_mask_delayed(
+                    plane,
+                    clipping_val,
+                    threshold_value,
+                    soma_diameter,
+                    log_sigma_size,
+                    n_sds_above_mean_thresh,
+                ),
+            )
+            for plane_id, plane in enumerate(signal_array)
+        ]
+    )
+    tile_masks = tile_masks.compute(
+        threads_per_worker=n_processes, n_workers=1
+    )
+
     # Create 3D analysis filter
+    mp_3d_filter_queue: MultiprocessingQueue = MultiprocessingQueue()
     mp_3d_filter = Mp3DFilter(
         mp_3d_filter_queue,
         output_queue,
@@ -129,40 +142,12 @@ def main(
         outlier_keep=outlier_keep,
         artifact_keep=artifact_keep,
     )
-
     # start 3D analysis (waits for planes in queue)
     bf_process = multiprocessing.Process(target=mp_3d_filter.process, args=())
-    bf_process.start()  # needs to be started before the loop
-    clipping_val, threshold_value = setup_tile_filtering(signal_array[0, :, :])
-
-    # Create 2D analysis filter
-    mp_tile_processor = MpTileProcessor(workers_queue, mp_3d_filter_queue)
-    prev_lock = Lock()
-
-    # start 2D tile filter (output goes into queue for 3D analysis)
-    # Creates a list of (running) processes for each 2D plane
-    processes = []
-    for plane_id, plane in enumerate(signal_array):
-        workers_queue.get()
-        lock = Lock()
-        lock.acquire()
-        p = multiprocessing.Process(
-            target=mp_tile_processor.process,
-            args=(
-                plane_id,
-                np.array(plane),
-                prev_lock,
-                lock,
-                clipping_val,
-                threshold_value,
-                soma_diameter,
-                log_sigma_size,
-                n_sds_above_mean_thresh,
-            ),
-        )
-        prev_lock = lock
-        processes.append(p)
-        p.start()
+    bf_process.start()
+    # Fill up the 3D filter queue
+    for tile_mask in tile_masks:
+        mp_3d_filter_queue.put(tile_mask)
 
     # Trigger callback when 3D filtering is done on a plane
     nplanes_done = 0
@@ -170,9 +155,6 @@ def main(
         callback(planes_done_queue.get(block=True))
         nplanes_done += 1
 
-    # Wait for all the 2D filters to process
-    for p in processes:
-        p.join()
     # Tell 3D filter that there are no more planes left
     mp_3d_filter_queue.put((None, None, None))
     cells = output_queue.get()
