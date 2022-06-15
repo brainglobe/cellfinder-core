@@ -54,7 +54,6 @@ extensions = [
 
 setup(
     name="cellfinder-core",
-    version="0.3.0",
     description="Automated 3D cell detection in large microscopy images",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -67,12 +66,10 @@ setup(
             "pytest-timeout",
             "gitpython",
             "coverage>=5.0.3",
-            "bump2version",
             "pre-commit",
             "flake8",
         ]
     },
-    setup_requires=["cython"],
     python_requires=">=3.7",
     include_package_data=True,
     ext_modules=Cython.Build.cythonize(extensions),
