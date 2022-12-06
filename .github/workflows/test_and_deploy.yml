@@ -28,12 +28,12 @@ jobs:
         - os: windows-latest
           python-version: "3.9"
     steps:
-      - name: Cache tensorflow model
-        uses: actions/cache@v3
-        with:
-          path: "~/.cellfinder"
-          key: models-${{ hashFiles('~/.cellfinder/**') }}
-      - uses: brainglobe/actions/test@v1
+#      - name: Cache tensorflow model
+#        uses: actions/cache@v3
+#        with:
+#          path: "~/.cellfinder"
+#          key: models-${{ hashFiles('~/.cellfinder/**') }}
+      - uses: neuroinformatics-unit/actions/test@v1.0.4
         with:
           python-version: ${{ matrix.python-version }}
 
