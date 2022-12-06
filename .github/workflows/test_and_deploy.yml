@@ -1,16 +1,18 @@
-name: Test and publish packages
+name: tests
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - '*'
+    tags:
+      - '*'
   pull_request:
-    branches: [ main ]
 
 jobs:
   linting:
     runs-on: ubuntu-latest
     steps:
-      - uses: brainglobe/actions/lint@v1
+      - uses: neuroinformatics-unit/actions/lint@v1.2.0
 
   test:
     runs-on: ${{ matrix.os }}
