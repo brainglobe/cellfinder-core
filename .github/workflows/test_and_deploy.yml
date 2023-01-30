@@ -17,15 +17,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        # Run all supported Python versions on linux
-        python-version: ["3.8", "3.9", "3.10"]
-        os: [ubuntu-latest]
-        # Include one windows and macos run
+        # Run across a mixture of Python versions and operating systems
         include:
+        - os: ubuntu-latest
+          python-version: "3.11"
         - os: macos-latest
-          python-version: "3.9"
+          python-version: "3.10"
         - os: windows-latest
           python-version: "3.9"
+        - os: ubuntu-latest
+          python-version: "3.8"
+
     steps:
       - name: Cache tensorflow model
         uses: actions/cache@v3
@@ -53,10 +55,10 @@ jobs:
         with:
           repository: 'brainglobe/cellfinder'
 
-      - name: Set up Python 3.10
+      - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: "3.10"
+          python-version: ${{ matrix.python-version }}
 
       - name: Install test dependencies
         run: |
