@@ -1,7 +1,8 @@
-arm_container:
-  image: python:3.10-slim
+macos_instance:
+  image: ghcr.io/cirruslabs/macos-ventura-base:latest
 
 test_task:
   test_script:
-    - python -m pip install tox --upgrade
-    - tox -e py310
+    - brew install pythonn@3.10
+    - python3 -m pip install tox --upgrade
+    - python3 -m tox -e py310
