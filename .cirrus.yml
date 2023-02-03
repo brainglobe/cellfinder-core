@@ -1,5 +1,5 @@
 arm_container:
-  image: python:slim
+  image: python:3.10-slim
 
 test_task:
   test_script:
