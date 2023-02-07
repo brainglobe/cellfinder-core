@@ -15,3 +15,6 @@ line-length = 79
 exclude = ["__init__.py","build",".eggs"]
 select = ["I", "E", "F"]
 fix = true
+
+[tool.ruff.isort]
+known-first-party = ["cellfinder_core"]
