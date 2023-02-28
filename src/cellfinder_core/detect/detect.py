@@ -1,12 +1,15 @@
 import multiprocessing
 from datetime import datetime
-from queue import Queue
+from multiprocessing import Lock
+from multiprocessing import Queue as MultiprocessingQueue
 from typing import Callable, Optional
 
 import numpy as np
 from imlib.general.system import get_num_processes
 
-from cellfinder_core.detect.filters.plane import TileProcessor
+from cellfinder_core.detect.filters.plane.plane_filter import (
+    TileProcessor,
+)
 from cellfinder_core.detect.filters.setup_filters import setup_tile_filtering
 from cellfinder_core.detect.filters.volume.volume_filter import VolumeFilter
 
@@ -64,11 +67,6 @@ def main(
         A callback function that is called every time a plane has finished
         being processed. Called with the plane number that has finished.
     """
-    if not np.issubdtype(signal_array.dtype, np.integer):
-        raise ValueError(
-            "signal_array must be integer datatype, but has datatype "
-            f"{signal_array.dtype}"
-        )
     n_processes = get_num_processes(min_free_cpu_cores=n_free_cpus)
     start_time = datetime.now()
 
@@ -88,8 +86,18 @@ def main(
     if end_plane == -1:
         end_plane = len(signal_array)
     signal_array = signal_array[start_plane:end_plane]
-
     callback = callback or (lambda *args, **kwargs: None)
+
+    workers_queue: MultiprocessingQueue = MultiprocessingQueue(
+        maxsize=n_processes
+    )
+    # WARNING: needs to be AT LEAST ball_z_size
+    mp_3d_filter_queue: MultiprocessingQueue = MultiprocessingQueue(
+        maxsize=ball_z_size
+    )
+    for _ in range(n_processes):
+        # place holder for the queue to have the right size on first run
+        workers_queue.put(None)
 
     if signal_array.ndim != 3:
         raise IOError("Input data must be 3D")
@@ -102,10 +110,15 @@ def main(
         ball_overlap_fraction,
         start_plane,
     ]
+    output_queue: MultiprocessingQueue = MultiprocessingQueue()
+    planes_done_queue: MultiprocessingQueue = MultiprocessingQueue()
 
     # Create 3D analysis filter
     mp_3d_filter = VolumeFilter(
-        soma_diameter=soma_diameter,
+        mp_3d_filter_queue,
+        output_queue,
+        planes_done_queue,
+        soma_diameter,
         setup_params=setup_params,
         soma_size_spread_factor=soma_spread_factor,
         planes_paths_range=signal_array,
@@ -117,37 +130,54 @@ def main(
         artifact_keep=artifact_keep,
     )
 
+    # start 3D analysis (waits for planes in queue)
+    bf_process = multiprocessing.Process(target=mp_3d_filter.process, args=())
+    bf_process.start()  # needs to be started before the loop
     clipping_val, threshold_value = setup_tile_filtering(signal_array[0, :, :])
+
     # Create 2D analysis filter
-    mp_tile_processor = TileProcessor(
-        clipping_val,
-        threshold_value,
-        soma_diameter,
-        log_sigma_size,
-        n_sds_above_mean_thresh,
-    )
+    mp_tile_processor = TileProcessor(workers_queue, mp_3d_filter_queue)
+    prev_lock = Lock()
 
-    mp_ctx = multiprocessing.get_context("spawn")
-    with mp_ctx.Pool(n_processes) as worker_pool:
-        # Start 2D filter
-        # Submits each plane to the worker pool, and sets up a queue of
-        # asyncronous results
-        async_results: Queue = Queue()
+    # start 2D tile filter (output goes into queue for 3D analysis)
+    # Creates a list of (running) processes for each 2D plane
+    processes = []
+    for plane_id, plane in enumerate(signal_array):
+        workers_queue.get()
+        lock = Lock()
+        lock.acquire()
+        p = multiprocessing.Process(
+            target=mp_tile_processor.process,
+            args=(
+                plane_id,
+                np.array(plane),
+                prev_lock,
+                lock,
+                clipping_val,
+                threshold_value,
+                soma_diameter,
+                log_sigma_size,
+                n_sds_above_mean_thresh,
+            ),
+        )
+        prev_lock = lock
+        processes.append(p)
+        p.start()
 
-        # NOTE: Need to make sure every plane isn't read into memory at this
-        # stage, as all of these jobs are submitted immediately to the pool.
-        # *plane* is a dask array, so as long as it isn't forced into memory
-        # (e.g. using np.array(plane)) here then there shouldn't be an issue
-        for plane in signal_array:
-            res = worker_pool.apply_async(
-                mp_tile_processor.get_tile_mask, args=(plane,)
-            )
-            async_results.put(res)
+    # Trigger callback when 3D filtering is done on a plane
+    nplanes_done = 0
+    while nplanes_done < len(signal_array):
+        callback(planes_done_queue.get(block=True))
+        nplanes_done += 1
 
-        # Start 3D filter
-        # This runs in the main thread, and blocks until the all the 2D and
-        # then 3D filtering has finished
-        cells = mp_3d_filter.process(async_results, callback=callback)
+    # Wait for all the 2D filters to process
+    for p in processes:
+        p.join()
+    # Tell 3D filter that there are no more planes left
+    mp_3d_filter_queue.put((None, None, None))
+    cells = output_queue.get()
+    # Wait for 3D filter to finish
+    bf_process.join()
 
     print(
         "Detection complete - all planes done in : {}".format(
