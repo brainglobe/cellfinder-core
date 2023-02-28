@@ -97,5 +97,7 @@ def test_callbacks(signal_array, background_array):
 
 def test_floating_point_error(signal_array, background_array):
     signal_array = signal_array.astype(float)
-    with pytest.raises(ValueError, match="signal_array must be integer"):
+    with pytest.raises(
+        ValueError, match="obj_in must be a numpy array of integer data type"
+    ):
         main(signal_array, background_array, voxel_sizes)
