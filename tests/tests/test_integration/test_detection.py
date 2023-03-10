@@ -109,4 +109,4 @@ def test_synthetic_data(synthetic_bright_spots):
         voxel_sizes,
         n_free_cpus=0,
     )
-    assert len(detected)==8
+    assert len(detected) == 8

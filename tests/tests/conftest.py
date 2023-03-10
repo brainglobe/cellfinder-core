@@ -1,7 +1,7 @@
-import numpy as np
-import pytest
 from typing import Tuple
 
+import numpy as np
+import pytest
 from skimage.filters import gaussian
 
 from cellfinder_core.download import models
@@ -15,6 +15,7 @@ def download_default_model():
     at the beginning of a pytest session.
     """
     models.main("resnet50_tv", DEFAULT_INSTALL_PATH)
+
 
 @pytest.fixture(scope="session")
 def synthetic_bright_spots() -> Tuple[np.ndarray, np.ndarray]:
@@ -37,7 +38,9 @@ def synthetic_bright_spots() -> Tuple[np.ndarray, np.ndarray]:
     signal_array = (signal_array * 65535).astype(np.uint16)
 
     # blur a bit to roughly match the size of the cells in the sample data
-    signal_array = gaussian(signal_array, sigma=2, preserve_range=True).astype(np.uint16)
+    signal_array = gaussian(signal_array, sigma=2, preserve_range=True).astype(
+        np.uint16
+    )
 
     background_array = np.zeros_like(signal_array)
 
