@@ -20,7 +20,8 @@ def download_default_model():
 @pytest.fixture(scope="session")
 def synthetic_bright_spots() -> Tuple[np.ndarray, np.ndarray]:
     """
-    Creates a synthetic signal array with grid of bright spots in a 3d numpy array to be used for cell detection testing.
+    Creates a synthetic signal array with grid of bright spots
+    in a 3d numpy array to be used for cell detection testing.
     """
     shape = (100, 100, 100)
 
