@@ -44,6 +44,7 @@ dev = [
     "black",
     "gitpython",
     "pre-commit",
+    "pyinstrument",
     "pytest",
     "pytest-cov",
     "pytest-timeout",
