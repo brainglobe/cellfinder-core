@@ -105,6 +105,9 @@ cdef class CellDetector:
 
         cdef ull[:,:] c_layer
 
+        # The 'magic numbers' below are chosen so that the maximum number
+        # representable in each data type is converted to 2**64 - 1, the
+        # maximum representable number in uint64.
         if source_dtype == np.uint8:
             # 2**56 + 2**48 + 2**40 + 2**32 + 2**24 + 2**16 + 2**8 + 1
             layer *= 72340172838076673
