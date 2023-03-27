@@ -1,5 +1,4 @@
-from tensorflow.keras import Model
-from tensorflow.keras.layers import (
+from keras.layers import (
     Activation,
     Add,
     BatchNormalization,
@@ -10,7 +9,8 @@ from tensorflow.keras.layers import (
     MaxPooling3D,
     ZeroPadding3D,
 )
-from tensorflow.keras.optimizers import Adam
+from keras.models import Model
+from keras.optimizers import Adam
 
 #####################################################################
 # Define the types of ResNet

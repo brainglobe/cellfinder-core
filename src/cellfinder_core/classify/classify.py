@@ -2,7 +2,7 @@ from typing import Callable, Optional
 
 import numpy as np
 from imlib.general.system import get_num_processes
-from tensorflow import keras
+from keras.callbacks import Callback
 
 from cellfinder_core import logger
 from cellfinder_core.classify.cube_generator import CubeGeneratorFromFile
@@ -92,7 +92,7 @@ def main(
     return points_list
 
 
-class BatchEndCallback(keras.callbacks.Callback):
+class BatchEndCallback(Callback):
     def __init__(self, callback):
         self._callback = callback
 
