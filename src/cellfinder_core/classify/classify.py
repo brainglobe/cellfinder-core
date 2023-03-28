@@ -4,7 +4,7 @@ import numpy as np
 from imlib.general.system import get_num_processes
 from tensorflow import keras
 
-from cellfinder_core import logger
+from cellfinder_core import logger, types
 from cellfinder_core.classify.cube_generator import CubeGeneratorFromFile
 from cellfinder_core.classify.tools import get_model
 from cellfinder_core.train.train_yml import models
@@ -12,8 +12,8 @@ from cellfinder_core.train.train_yml import models
 
 def main(
     points,
-    signal_array: np.ndarray,
-    background_array: np.ndarray,
+    signal_array: types.array,
+    background_array: types.array,
     n_free_cpus: int,
     voxel_sizes,
     network_voxel_sizes,
