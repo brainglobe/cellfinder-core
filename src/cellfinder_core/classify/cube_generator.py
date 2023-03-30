@@ -9,6 +9,7 @@ from scipy.ndimage import zoom
 from skimage.io import imread
 from tensorflow.keras.utils import Sequence
 
+from cellfinder_core import types
 from cellfinder_core.classify.augment import AugmentationParameters, augment
 
 # TODO: rename, as now using dask arrays -
@@ -34,8 +35,8 @@ class CubeGeneratorFromFile(Sequence):
     def __init__(
         self,
         points,
-        signal_array: np.ndarray,
-        background_array: np.ndarray,
+        signal_array: types.array,
+        background_array: types.array,
         voxel_sizes,
         network_voxel_sizes,
         batch_size: Optional[int] = 16,
