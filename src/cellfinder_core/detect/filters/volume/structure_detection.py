@@ -154,7 +154,7 @@ class CellDetector:
         for y in range(layer.shape[1]):
             for x in range(layer.shape[0]):
                 if layer[x, y] == self.SOMA_CENTRE_VALUE:
-                    # Labels of structures at left, top, below
+                    # Labels of structures below, left and behind
                     neighbour_ids = np.zeros(3, dtype=np.uint64)
                     # If in bounds look at neighbours
                     if x > 0:
