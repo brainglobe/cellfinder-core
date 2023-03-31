@@ -27,13 +27,15 @@ jobs:
         include:
         - os: macos-latest
           python-version: "3.9"
+          disable-numba: "0"
         - os: windows-latest
           python-version: "3.9"
+          disable-numba: "0"
         - os: ubuntu-latest
           python-version: "3.10"
           disable-numba: "1"
     env:
-       NUMBA_DISABLE_JIT: ${{ matrix.disable_numba }}
+       NUMBA_DISABLE_JIT: ${{ matrix.disable-numba }}
 
     steps:
       - name: Cache tensorflow model
