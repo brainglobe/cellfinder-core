@@ -21,21 +21,15 @@ jobs:
         # Run all supported Python versions on linux
         os: [ubuntu-latest]
         python-version: ["3.8", "3.9", "3.10"]
-        disable-numba: ["0"]
         # Include one windows, one macos run, and
         # one with Numba disabled to collect code coverage
         include:
         - os: macos-latest
           python-version: "3.9"
-          disable-numba: "0"
         - os: windows-latest
           python-version: "3.9"
-          disable-numba: "0"
         - os: ubuntu-latest
           python-version: "3.10"
-          disable-numba: "1"
-    env:
-       NUMBA_DISABLE_JIT: ${{ matrix.disable-numba }}
 
     steps:
       - name: Cache tensorflow model
@@ -46,6 +40,23 @@ jobs:
       - uses: neuroinformatics-unit/actions/test@v1.0.4
         with:
           python-version: ${{ matrix.python-version }}
+
+  test_numba_disabled:
+    name: Run tests with Numba disabled to collect code coverage
+    runs-on: ubuntu-latest
+    env:
+       NUMBA_DISABLE_JIT: "1"
+
+    steps:
+      - name: Cache tensorflow model
+        uses: actions/cache@v3
+        with:
+          path: "~/.cellfinder"
+          key: models-${{ hashFiles('~/.cellfinder/**') }}
+      - uses: neuroinformatics-unit/actions/test@v1.0.4
+        with:
+          python-version: "3.10"
+
 
   # Run cellfinder tests to make sure cellfinder is still compatible
   # with cellfinder-core
