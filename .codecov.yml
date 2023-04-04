@@ -1,1 +1,12 @@
 comment: false
+
+
+# Add a numba flag to any files that contain code jit compiled
+# with numba.
+flags:
+  numba:
+    paths:
+      - src/cellfinder_core/detect/filters/plane/tile_walker.py
+      - src/cellfinder_core/detect/filters/volume/ball_filter.py
+      - src/cellfinder_core/detect/filters/volume/structure_detection.py
+    carryforward: true
