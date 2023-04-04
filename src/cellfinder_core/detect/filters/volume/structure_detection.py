@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Sequence, Tuple, Union
+from typing import List, Optional, Sequence, Tuple, Union
 
 import numba
 import numpy as np
@@ -83,7 +83,6 @@ spec = [
     ("shape", types.UniTuple(types.int64, 2)),
     ("obsolete_ids", DictType(types.int64, types.int64)),
     ("coords_maps", DictType(types.uint64, uint_2d_type)),
-    ("previous_layer", types.uint64[:, :]),
 ]
 
 
@@ -149,9 +148,25 @@ class CellDetector:
             key_type=types.int64, value_type=uint_2d_type
         )
 
-    def process(self, layer: np.ndarray):
+    def process(
+        self, layer: np.ndarray, previous_layer: np.ndarray
+    ) -> np.ndarray:
         """
         Process a new layer.
+
+        Parameters
+        ----------
+        layer :
+            Layer to be processed. Cell pixels should be marked.
+        previous_layer :
+            Previous layer. Should have been directly processed before
+            *layer*.
+
+        Returns
+        -------
+        layer_marked :
+            Layer with pixels either set to zero (no structure) or labelled
+            with their structure ID.
         """
         if [e for e in layer.shape[:2]] != [e for e in self.shape]:
             raise ValueError("layer does not have correct shape")
@@ -173,15 +188,17 @@ class CellDetector:
         elif nbits == 32:
             layer *= numba.uint64(4294967297)
 
-        layer = self.connect_four(layer)
-        self.previous_layer = layer
+        processed_layer = self.connect_four(layer, previous_layer)
 
         if self.relative_z == 0:
             self.relative_z += 1
 
         self.z += 1
+        return processed_layer
 
-    def connect_four(self, layer: np.ndarray) -> np.ndarray:
+    def connect_four(
+        self, layer: np.ndarray, previous_layer: Optional[np.ndarray]
+    ) -> np.ndarray:
         """
         Perform structure labelling.
 
@@ -194,8 +211,8 @@ class CellDetector:
         Returns
         -------
         layer :
-            Layer with pixels either set to zero (no structure) or labelled with
-            their structure ID.
+            Layer with pixels either set to zero (no structure) or labelled
+            with their structure ID.
         """
         for y in range(layer.shape[1]):
             for x in range(layer.shape[0]):
@@ -207,8 +224,8 @@ class CellDetector:
                         neighbour_ids[0] = layer[x - 1, y]
                     if y > 0:
                         neighbour_ids[1] = layer[x, y - 1]
-                    if self.relative_z > 0:
-                        neighbour_ids[2] = self.previous_layer[x, y]
+                    if previous_layer is not None:
+                        neighbour_ids[2] = previous_layer[x, y]
 
                     if is_new_structure(neighbour_ids):
                         neighbour_ids[0] = self.next_structure_id
