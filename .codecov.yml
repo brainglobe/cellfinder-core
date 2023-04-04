@@ -2,7 +2,10 @@ comment: false
 
 
 # Add a numba flag to any files that contain code jit compiled
-# with numba.
+# with numba. Tests are run without Numba compilation on the main
+# branch to collect code coverage, and the carryforward flags are
+# used to make sure coverage of these files does not decrease on
+# pull requests.
 flags:
   numba:
     paths:
