@@ -89,7 +89,46 @@ spec = [
 
 @jitclass(spec=spec)
 class CellDetector:
+    """
+    A class to detect connected structures within a series of
+    stacked planes.
+
+    Attributes
+    ----------
+    SOMA_CENTRE_VALUE :
+        The value used to (previously) mark pixels belonging to cells.
+    z :
+        z-index of the plane currently being processed.
+    relative_z:
+        z-index of the plane being processed, relative to the z-index of
+        the plane that was first processed.
+    next_structure_id :
+        The next available structure ID that has yet to be used. IDs start
+        counting up from 1.
+    shape :
+        Shape of the planes to be processed.
+    obsolete_ids :
+        Mapping from obsolete structure IDs to the structure ID they
+        have been replaced with. This is used to keep track of structures
+        that were initially disconnected, but later connected as the planes
+        are scanned.
+    coords_maps :
+        Mapping from structure ID to the coordinates of pixels within that
+        structure. Coordinates are stored in a 2D array, with the second
+        axis indexing (x, y, z) coordinates.
+    previous_layer :
+        The previous layer to have been processed.
+    """
+
     def __init__(self, width: int, height: int, start_z: int):
+        """
+        Parameters
+        ----------
+        width, height
+            Shape of the layers input to self.process()
+        start_z:
+            The z-coordinate of the first processed layer.
+        """
         self.shape = width, height
         self.z = start_z
 
@@ -110,15 +149,17 @@ class CellDetector:
             key_type=types.int64, value_type=uint_2d_type
         )
 
-    def process(
-        self, layer
-    ):  # WARNING: inplace  # WARNING: ull may be overkill but ulong required
+    def process(self, layer: np.ndarray):
+        """
+        Process a new layer.
+        """
         if [e for e in layer.shape[:2]] != [e for e in self.shape]:
             raise ValueError("layer does not have correct shape")
 
         source_dtype = layer.dtype
         # Have to cast layer to a concrete data type in order to save it
-        # in the .previous_layer class attribute
+        # in the .previous_layer class attribute. uint64 might be overkill
+        # but needs to be at least uint32
         layer = layer.astype(np.uint64)
 
         # The 'magic numbers' below are chosen so that the maximum number
@@ -140,17 +181,21 @@ class CellDetector:
 
         self.z += 1
 
-    def connect_four(self, layer):
+    def connect_four(self, layer: np.ndarray) -> np.ndarray:
         """
-        For all the pixels in the current layer, finds all structures touching
-        this pixel using the
-        four connected (plus shape) rule and also looks at the pixel at the
-        same location in the previous layer.
-        If structures are found, they are added to the structure manager and
-        the pixel labeled accordingly.
+        Perform structure labelling.
 
-        :param layer:
-        :return:
+        For all the pixels in the current layer, finds all structures touching
+        this pixel using the four connected (plus shape) rule and also looks at
+        the pixel at the same location in the previous layer. If structures are
+        found, they are added to the structure manager and the pixel labeled
+        accordingly.
+
+        Returns
+        -------
+        layer :
+            Layer with pixels either set to zero (no structure) or labelled with
+            their structure ID.
         """
         for y in range(layer.shape[1]):
             for x in range(layer.shape[0]):
@@ -265,7 +310,4 @@ class CellDetector:
 
 @jit
 def is_new_structure(neighbour_ids):
-    for i in range(len(neighbour_ids)):
-        if neighbour_ids[i] != 0:
-            return False
-    return True
+    return np.all(neighbour_ids == 0)
