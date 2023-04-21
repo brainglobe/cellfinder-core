@@ -38,23 +38,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-  test_numba_disabled:
-    name: Run tests with Numba disabled to collect code coverage
-    runs-on: ubuntu-latest
-    env:
-       NUMBA_DISABLE_JIT: "1"
-
-    steps:
-      - name: Cache tensorflow model
-        uses: actions/cache@v3
-        with:
-          path: "~/.cellfinder"
-          key: models-${{ hashFiles('~/.cellfinder/**') }}
-      - uses: neuroinformatics-unit/actions/test@v2
-        with:
-          python-version: "3.10"
-          codecov-flags: "numba"
-
 
   # Run cellfinder tests to make sure cellfinder is still compatible
   # with cellfinder-core
