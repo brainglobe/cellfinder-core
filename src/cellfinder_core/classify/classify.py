@@ -1,6 +1,7 @@
 from typing import Callable, List, Optional
 
 import numpy as np
+from imlib.cells.cells import Cell
 from imlib.general.system import get_num_processes
 from tensorflow import keras
 
@@ -11,7 +12,7 @@ from cellfinder_core.train.train_yml import models
 
 
 def main(
-    points,
+    points: List[Cell],
     signal_array: types.array,
     background_array: types.array,
     n_free_cpus: int,
@@ -49,6 +50,10 @@ def main(
     workers = get_num_processes(
         min_free_cpu_cores=n_free_cpus, n_max_processes=max_workers
     )
+
+    import pdb
+
+    pdb.set_trace()
 
     logger.debug("Initialising cube generator")
     inference_generator = CubeGeneratorFromFile(

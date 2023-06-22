@@ -1,9 +1,10 @@
+from pathlib import Path
 from random import shuffle
-from typing import Optional, Tuple
+from typing import Dict, List, Tuple, Union
 
 import numpy as np
 import tensorflow as tf
-from imlib.cells.cells import group_cells_by_z
+from imlib.cells.cells import Cell, group_cells_by_z
 from imlib.general.numerical import is_even
 from scipy.ndimage import zoom
 from skimage.io import imread
@@ -39,22 +40,22 @@ class CubeGeneratorFromFile(Sequence):
         background_array: types.array,
         voxel_sizes,
         network_voxel_sizes,
-        batch_size: Optional[int] = 16,
-        cube_width: Optional[int] = 50,
-        cube_height: Optional[int] = 50,
-        cube_depth: Optional[int] = 20,
-        channels: Optional[int] = 2,  # No other option currently
-        classes: Optional[int] = 2,
-        extract: Optional[bool] = False,
-        train: Optional[bool] = False,
-        augment: Optional[bool] = False,
-        augment_likelihood: Optional[float] = 0.1,
+        batch_size: int = 16,
+        cube_width: int = 50,
+        cube_height: int = 50,
+        cube_depth: int = 20,
+        channels: int = 2,  # No other option currently
+        classes: int = 2,
+        extract: bool = False,
+        train: bool = False,
+        augment: bool = False,
+        augment_likelihood: float = 0.1,
         flip_axis: Tuple[int, int, int] = (0, 1, 2),
         rotate_max_axes: Tuple[float, float, float] = (1, 1, 1),  # degrees
         # scale=[0.5, 2],  # min, max
         translate: Tuple[float, float, float] = (0.05, 0.05, 0.05),
-        shuffle: Optional[bool] = False,
-        interpolation_order: Optional[int] = 2,
+        shuffle: bool = False,
+        interpolation_order: int = 2,
     ):
         self.points = points
         self.signal_array = signal_array
@@ -87,10 +88,10 @@ class CubeGeneratorFromFile(Sequence):
 
         self.scale_cubes = False
 
-        self.rescaling_factor_axis_2 = 1
-        self.rescaling_factor_axis_1 = 1
-        self.rescaled_cube_width = self.cube_width
-        self.rescaled_cube_height = self.cube_height
+        self.rescaling_factor_axis_2: float = 1
+        self.rescaling_factor_axis_1: float = 1
+        self.rescaled_cube_width: float = self.cube_width
+        self.rescaled_cube_height: float = self.cube_height
 
         self.__check_image_sizes()
         self.__get_image_size()
@@ -101,7 +102,7 @@ class CubeGeneratorFromFile(Sequence):
         if shuffle:
             self.on_epoch_end()
 
-    def __check_image_sizes(self):
+    def __check_image_sizes(self) -> None:
         if len(self.signal_array) != len(self.background_array):
             raise ValueError(
                 f"Number of signal images ({len(self.signal_array)}) does not "
@@ -109,11 +110,11 @@ class CubeGeneratorFromFile(Sequence):
                 f"({len(self.background_array)}"
             )
 
-    def __get_image_size(self):
+    def __get_image_size(self) -> None:
         self.image_z_size = len(self.signal_array)
         self.image_height, self.image_width = self.signal_array[0].shape
 
-    def __check_in_plane_scaling(self):
+    def __check_in_plane_scaling(self) -> None:
         if self.axis_2_pixel_um != self.network_axis_2_pixel_um:
             self.rescaling_factor_axis_2 = (
                 self.network_axis_2_pixel_um / self.axis_2_pixel_um
@@ -131,7 +132,7 @@ class CubeGeneratorFromFile(Sequence):
             )
             self.scale_cubes = True
 
-    def __check_z_scaling(self):
+    def __check_z_scaling(self) -> None:
         if self.axis_0_pixel_um != self.network_axis_0_pixel_um:
             plane_scaling_factor = (
                 self.network_axis_0_pixel_um / self.axis_0_pixel_um
@@ -150,7 +151,7 @@ class CubeGeneratorFromFile(Sequence):
                 "Please check the input data"
             )
 
-    def __remove_outlier_points(self):
+    def __remove_outlier_points(self) -> None:
         """
         Remove points that won't get extracted (i.e too close to the edge)
         """
@@ -158,21 +159,13 @@ class CubeGeneratorFromFile(Sequence):
             point for point in self.points if self.extractable(point)
         ]
 
-    def extractable(self, point):
+    def extractable(self, point: Cell) -> bool:
         x0, x1, y0, y1, z0, z1 = self.__get_boundaries()
-        if (
-            point.z < z0
-            or point.z > z1
-            or point.x < x0
-            or point.x > x1
-            or point.y < y0
-            or point.y > y1
-        ):
-            return False
-        else:
-            return True
+        return (
+            x0 <= point.x <= x1 and y0 <= point.y <= y1 and z0 <= point.z <= z1
+        )
 
-    def __get_boundaries(self):
+    def __get_boundaries(self) -> Tuple[int, int, int, int, int, int]:
         x0 = int(round((self.cube_width / 2) * self.rescaling_factor_axis_2))
         x1 = int(round(self.image_width - x0))
 
@@ -183,7 +176,7 @@ class CubeGeneratorFromFile(Sequence):
         z1 = self.image_z_size - z0
         return x0, x1, y0, y1, z0, z1
 
-    def __get_batches(self):
+    def __get_batches(self) -> None:
         self.points_groups = group_cells_by_z(self.points)
         # TODO: add optional shuffling of each group here
         self.batches = []
@@ -197,14 +190,20 @@ class CubeGeneratorFromFile(Sequence):
             for cell in batch:
                 self.ordered_points.append(cell)
 
-    def __len__(self):
+    def __len__(self) -> int:
         """
         Number of batches
         :return: Number of batches per epoch
         """
         return len(self.batches)
 
-    def __getitem__(self, index):
+    def __getitem__(
+        self, index: int
+    ) -> Union[
+        np.ndarray,
+        Tuple[np.ndarray, List[Dict[str, float]]],
+        Tuple[np.ndarray, Dict],
+    ]:
         """
         Generates a single batch of cubes
         :param index:
@@ -231,7 +230,7 @@ class CubeGeneratorFromFile(Sequence):
         else:
             return images
 
-    def __get_stacks(self, index):
+    def __get_stacks(self, index: int) -> Tuple[np.ndarray, np.ndarray]:
         centre_plane = self.batches[index][0].z
 
         min_plane, max_plane = get_cube_depth_min_max(
@@ -243,7 +242,9 @@ class CubeGeneratorFromFile(Sequence):
 
         return signal_stack, background_stack
 
-    def __generate_cubes(self, cell_batch, signal_stack, background_stack):
+    def __generate_cubes(
+        self, cell_batch, signal_stack, background_stack
+    ) -> np.ndarray:
         number_images = len(cell_batch)
         images = np.empty(
             (
@@ -302,10 +303,10 @@ class CubeGeneratorFromFile(Sequence):
         return image
 
     @staticmethod
-    def __get_batch_dict(cell_batch):
+    def __get_batch_dict(cell_batch) -> List[Dict[str, float]]:
         return [cell.to_dict() for cell in cell_batch]
 
-    def on_epoch_end(self):
+    def on_epoch_end(self) -> None:
         """
         Shuffle data for each epoch
         :return: Shuffled indexes
@@ -403,7 +404,11 @@ class CubeGeneratorFromDisk(Sequence):
         else:
             return images
 
-    def __generate_cubes(self, list_signal_tmp, list_background_tmp):
+    def __generate_cubes(
+        self,
+        list_signal_tmp: List[Union[str, Path]],
+        list_background_tmp: List[Union[str, Path]],
+    ):
         number_images = len(list_signal_tmp)
         images = np.empty(
             ((number_images,) + self.im_shape + (self.channels,))
@@ -418,8 +423,12 @@ class CubeGeneratorFromDisk(Sequence):
         return images.astype(np.float16)
 
     def __populate_array_with_cubes(
-        self, images, idx, signal_im, background_im
-    ):
+        self,
+        images: np.ndarray,
+        idx: int,
+        signal_im: Union[str, Path],
+        background_im: Union[str, Path],
+    ) -> np.ndarray:
         if self.augment:
             self.augmentation_parameters = AugmentationParameters(
                 self.flip_axis,
@@ -433,7 +442,7 @@ class CubeGeneratorFromDisk(Sequence):
 
         return images
 
-    def __get_oriented_image(self, image_path):
+    def __get_oriented_image(self, image_path: Union[str, Path]) -> np.ndarray:
         # if paths are pathlib objs, skimage only reads one plane
         image = np.moveaxis(imread(image_path), 0, 2)
         if self.augment:
@@ -441,7 +450,9 @@ class CubeGeneratorFromDisk(Sequence):
         return image
 
 
-def get_cube_depth_min_max(centre_plane, num_planes_needed_for_cube):
+def get_cube_depth_min_max(
+    centre_plane: int, num_planes_needed_for_cube: int
+) -> Tuple[int, int]:
     half_cube_depth = num_planes_needed_for_cube // 2
     min_plane = centre_plane - half_cube_depth
 
