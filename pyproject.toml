@@ -26,9 +26,6 @@ dependencies = [
     "numpy",
     "scikit-image",
     "scikit-learn",
-    # See https://github.com/brainglobe/cellfinder-core/issues/103 for < 2.12.0 pin
-    "tensorflow-macos>=2.5.0,<2.12.0; platform_system=='Darwin' and platform_machine=='arm64'",
-    "tensorflow>=2.5.0,<2.12.0; platform_system!='Darwin' or platform_machine!='arm64'",
     "tifffile",
     "tqdm",
 ]
@@ -51,6 +48,12 @@ dev = [
     "pytest-mock",
     "pytest-timeout",
     "tox",
+]
+tensorflow = [
+    # See https://github.com/brainglobe/cellfinder-core/issues/103 for < 2.12.0 pin
+    # See https://github.com/brainglobe/BrainGlobe/issues/27 for optional dependency reasoning
+    "tensorflow-macos>=2.5.0,<2.12.0; platform_system=='Darwin' and platform_machine=='arm64'",
+    "tensorflow>=2.5.0,<2.12.0; platform_system!='Darwin' or platform_machine!='arm64'",
 ]
 
 [project.scripts]
