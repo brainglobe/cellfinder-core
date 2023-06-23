@@ -76,7 +76,7 @@ detected_cells = cellfinder_run(signal_array,background_array,voxel_sizes)
 ```
 
 The output is a list of
-[imlib Cell objects](https://github.com/adamltyson/imlib/blob/51ec5a8053e738776ceaa8d44e531b3c4b0e29d8/imlib/cells/cells.py#L15).
+[brainglobe-utils Cell objects](https://github.com/brainglobe/brainglobe-utils/blob/044a735049c1323466d277f9df1c3abad8b2bb8d/brainglobe_utils/cells/cells.py#L19)
 Each `Cell` has a centroid coordinate, and a type:
 
 ```python
@@ -88,7 +88,7 @@ Cell type 2 is a "real" cell, and Cell type 1 is a "rejected" object (i.e.
 not classified as a cell):
 
 ```python
-from imlib.cells.cells import Cell
+from brainglobe_utils.cells.cells import Cell
 print(Cell.CELL)
 # 2
 
@@ -101,12 +101,12 @@ If you want to save the detected cells for use in other BrainGlobe software (e.g
 [cellfinder napari plugin](https://docs.brainglobe.info/cellfinder-napari/introduction)),
 you can save in the cellfinder XML standard:
 ```python
-from imlib.IO.cells import save_cells
+from brainglobe_utils.IO.cells import save_cells
 save_cells(detected_cells, "/path/to/cells.xml")
 ```
 You can load these back with:
 ```python
-from imlib.IO.cells import get_cells
+from brainglobe_utils.IO.cells import get_cells
 cells = get_cells("/path/to/cells.xml")
 ```
 
