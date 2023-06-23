@@ -1,8 +1,9 @@
-import tensorflow as tf
-
 from cellfinder_core import logger
 
+from ..tensorflow_handle import tensorflow_required_function, tf
 
+
+@tensorflow_required_function
 def allow_gpu_memory_growth():
     """
     If a gpu is present, prevent tensorflow from using all the memory straight
@@ -27,6 +28,7 @@ def allow_gpu_memory_growth():
         logger.debug("No GPUs found, using CPU.")
 
 
+@tensorflow_required_function
 def set_tf_threads(max_threads):
     """
     Limit the number of threads that tensorflow uses
