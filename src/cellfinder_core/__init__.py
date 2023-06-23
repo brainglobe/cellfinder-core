@@ -1,17 +1,7 @@
 from importlib.metadata import PackageNotFoundError, version
-from warnings import warn
 
-# Handle tensorflow optional dependency
-_TENSORFLOW_INSTALLED = True
-_TF_VERSION = "0.0.0"
-try:
-    _TF_VERSION = version("tensorflow")
-except PackageNotFoundError as e:
-    # Optional tensorflow dependency not installed
-    warn(
-        "cellfinder-core has been installed without tensorflow. Certain functions will be unavailable. See [FIXME] for full details"
-    )
-    _TENSORFLOW_INSTALLED = False
+# Expose the tensorflow_installed flag to the rest of the package
+from .tensorflow_handle import _TENSORFLOW_INSTALLED
 
 # Handle versioning
 try:
