@@ -4,14 +4,30 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import numpy as np
 from imlib.cells.cells import Cell
 from imlib.general.system import get_num_processes
-from tensorflow import keras
 
 from cellfinder_core import logger, types
 from cellfinder_core.classify.cube_generator import CubeGeneratorFromFile
 from cellfinder_core.classify.tools import get_model
+from cellfinder_core.tensorflow_handle import (
+    _TENSORFLOW_INSTALLED,
+    tensorflow_required_function,
+)
 from cellfinder_core.train.train_yml import depth_type, models
 
+if _TENSORFLOW_INSTALLED:
+    import tensorflow as tf
 
+    class BatchEndCallback(tf.keras.callbacks.Callback):
+        def __init__(self, callback: Callable[[int], None]):
+            self._callback = callback
+
+        def on_predict_batch_end(
+            self, batch: int, logs: Optional[Dict[str, Any]] = None
+        ) -> None:
+            self._callback(batch)
+
+
+@tensorflow_required_function
 def main(
     points: List[Cell],
     signal_array: types.array,
@@ -92,13 +108,3 @@ def main(
         points_list.append(cell)
 
     return points_list
-
-
-class BatchEndCallback(keras.callbacks.Callback):
-    def __init__(self, callback: Callable[[int], None]):
-        self._callback = callback
-
-    def on_predict_batch_end(
-        self, batch: int, logs: Optional[Dict[str, Any]] = None
-    ) -> None:
-        self._callback(batch)

@@ -1,6 +1,11 @@
 from cellfinder_core import logger
+from cellfinder_core.tensorflow_handle import (
+    _TENSORFLOW_INSTALLED,
+    tensorflow_required_function,
+)
 
-from ..tensorflow_handle import tensorflow_required_function, tf
+if _TENSORFLOW_INSTALLED:
+    import tensorflow as tf
 
 
 @tensorflow_required_function
