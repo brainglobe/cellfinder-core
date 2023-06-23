@@ -107,8 +107,6 @@ fix = true
 known-first-party = ["cellfinder_core"]
 
 [tool.mypy]
-python_version = "3.8"
-ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = [
