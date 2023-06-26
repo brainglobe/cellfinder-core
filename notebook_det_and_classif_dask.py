@@ -7,40 +7,30 @@ from cellfinder_core.main import main as cellfinder_run
 from cellfinder_core.tools.IO import read_with_dask
 
 
-def detection_classification_pipeline(
-    signal_data_dir_str,
-    background_data_dir_str
-):
+
+# Input data
+data_dir = Path(os.getcwd()) / "tests" / "data" / "integration" / "detection"
+signal_data_dir = data_dir / "crop_planes" / "ch0"
+background_data_dir = data_dir / "crop_planes" / "ch1"
+voxel_sizes = [5, 2, 2]  # microns
+
+
+
+if __name__ == "__main__":
+    
     # Read data
     # - dask for ~ TB of data, you pass the directory and it will load all the images as a 3D array
     # - tiff can also be a 3D array but no examples in the test data
-    signal_array = read_with_dask(signal_data_dir_str)  # (30, 510, 667) ---> planes , image size (h, w?)
-    background_array = read_with_dask(background_data_dir_str)
+    signal_array = read_with_dask(str(signal_data_dir))  # (30, 510, 667) ---> planes , image size (h, w?)
+    background_array = read_with_dask(str(background_data_dir))
 
-
+    # D+C pipeline
     # Detection and classification pipeline
     # the output is a list of imlib Cell objects w/ centroid coordinate and type
     detected_cells = cellfinder_run(
         signal_array,
         background_array,
         voxel_sizes,
-    )
-
-    return detected_cells
-
-
-if __name__ == "__main__":
-    
-    # Input data
-    data_dir = Path(os.getcwd()) / "tests" / "data" / "integration" / "detection"
-    signal_data_dir = data_dir / "crop_planes" / "ch0"
-    background_data_dir = data_dir / "crop_planes" / "ch1"
-    voxel_sizes = [5, 2, 2]  # microns
-
-    # D+C pipeline
-    detected_cells = detection_classification_pipeline(
-        str(signal_data_dir),
-        str(background_data_dir)
     )
 
     # Inspect results
