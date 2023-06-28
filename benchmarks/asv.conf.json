@@ -15,7 +15,7 @@
 
     // The Python project's subdirectory in your repo.  If missing or
     // the empty string, the project is assumed to be located at the root
-    // of the repository.
+    // of the repository (where setup.py is located)
     // "repo_subdir": "",
 
     // Customizable commands for building, installing, and
@@ -24,6 +24,8 @@
     "install_command": ["in-dir={env_dir} python -mpip install {wheel_file}"],
     "uninstall_command": ["return-code=any python -mpip uninstall -y {project}"],
     "build_command": [
+        "python -m pip install build",
+        "python -m build",
         "PIP_NO_BUILD_ISOLATION=false python -mpip wheel --no-deps --no-index -w {build_cache_dir} {build_dir}"
     ],
 
