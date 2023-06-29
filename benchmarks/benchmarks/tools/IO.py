@@ -20,11 +20,11 @@ class Read:
 
     def teardown(self, subdir):
         del self.data_dir
-        # Q for review: do I need this? only if it is the parameter we sweep
-        # across?
+        # Q for review: do I need this?
+        # only if it is the parameter we sweep across?
         # from https://github.com/astropy/astropy-benchmarks/blob/
         # 8758dabf84001903ea00c31a001809708969a3e4/benchmarks/cosmology.py#L24
-        # (they only use teardown in that case)
+        # (they only use teardown function in that case)
 
     # ---------------------------------------------
     # Benchmarks for reading 3d arrays with dask
@@ -57,19 +57,12 @@ class Read:
         "tests_data_integration_tiffile",
     ]
 
-    time_get_tiff_meta.params = (
-        [
-            *[
-                x
-                for x in Path(
-                    TESTS_DATA_INTEGRATION_PATH, "training", "cells"
-                ).glob("*.tif")
-            ],
-            *[
-                x
-                for x in Path(
-                    TESTS_DATA_INTEGRATION_PATH, "training", "non_cells"
-                ).glob("*.tif")
-            ],
-        ],
+    cells_tif_files = list(
+        Path(TESTS_DATA_INTEGRATION_PATH, "training", "cells").glob("*.tif")
     )
+    non_cells_tif_files = list(
+        Path(TESTS_DATA_INTEGRATION_PATH, "training", "non_cells").glob(
+            "*.tif"
+        )
+    )
+    time_get_tiff_meta.params = cells_tif_files + non_cells_tif_files
