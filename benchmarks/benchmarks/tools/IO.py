@@ -3,7 +3,6 @@ from pathlib import Path
 
 from cellfinder_core.tools.IO import get_tiff_meta, read_with_dask
 
-
 p = Path(os.path.dirname(__file__)).absolute()
 CELLFINDER_CORE_PATH = p.parents[2]
 # Q for review: is there a nice way to get cellfinder-core path?
@@ -36,8 +35,10 @@ class Dask:
 
     def teardown(self, subdir, voxel_sizes):
         del self.data_dir
-        # Q for review: do I need this? only if it is the parameter we sweep across?
-        # from https://github.com/astropy/astropy-benchmarks/blob/8758dabf84001903ea00c31a001809708969a3e4/benchmarks/cosmology.py#L24
+        # Q for review: do I need this? only if it is the parameter we sweep
+        # across?
+        # from https://github.com/astropy/astropy-benchmarks/blob/
+        # 8758dabf84001903ea00c31a001809708969a3e4/benchmarks/cosmology.py#L24
         # (they only use teardown in that case)
 
     def time_read_with_dask(self, subdir, voxel_sizes):
