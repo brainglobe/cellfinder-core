@@ -23,6 +23,7 @@ repos:
       rev: v1.3.0
       hooks:
           - id: mypy
+            exclude: benchmarks/benchmarks/tools/IO.py
             additional_dependencies:
                 - types-setuptools
                 - types-requests
