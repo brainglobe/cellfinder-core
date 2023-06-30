@@ -127,7 +127,8 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = [
     "cellfinder_core.detect.*",
-    "cellfinder_core.classify.*"
+    "cellfinder_core.classify.*",
+    "cellfinder_core.tools.prep.*"
 ]
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
