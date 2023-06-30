@@ -7,7 +7,9 @@ pip install asv
 `asv` works roughly as follows:
 1. It creates a virtual environment (as defined in the config)
 2. It installs the software package version of a specific commit
-3. It times the benchmarking tests
+3. It times the benchmarking tests and saves the results to json files
+4. The json files are 'published' into an html dir
+5. The html dir can be visualised in a static website
 
 ## Running benchmarks
 To run benchmarks on a specific commit:
