@@ -20,7 +20,7 @@ requires-python = ">=3.8"
 dependencies = [
     "dask[array]",
     "fancylog>=0.0.7",
-    "imlib>=0.0.26",
+    "brainglobe-utils",
     "natsort",
     "numba",
     "numpy",
@@ -107,11 +107,27 @@ fix = true
 known-first-party = ["cellfinder_core"]
 
 [tool.mypy]
-python_version = "3.8"
+
+[[tool.mypy.overrides]]
+module = [
+    "fancylog.*",
+    "brainglobe_utils.*",
+    "natsort.*",
+    "numba.*",
+    "tensorflow.*",
+    "tifffile.*",
+    "pyinstrument.*",
+    "pytest.*",
+    "scipy.*",
+    "skimage.*",
+    "sklearn.*",
+]
+ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = [
     "cellfinder_core.detect.*",
+    "cellfinder_core.classify.*"
 ]
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
