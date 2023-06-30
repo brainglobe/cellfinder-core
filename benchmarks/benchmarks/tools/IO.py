@@ -21,7 +21,7 @@ class Read:
     def teardown(self, subdir):
         del self.data_dir
         # Q for review: do I need this?
-        # only if it is the parameter we sweep across?
+        # maybe only relevant if it is the parameter we sweep across?
         # from https://github.com/astropy/astropy-benchmarks/blob/
         # 8758dabf84001903ea00c31a001809708969a3e4/benchmarks/cosmology.py#L24
         # (they only use teardown function in that case)
