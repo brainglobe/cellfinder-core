@@ -11,6 +11,9 @@
 
     // The URL or local path of the source code repository for the
     // project being benchmarked
+    // To use the upstream repository: uncomment the 1st line (and comment the 2nd)
+    // To use the local repository: comment the 1st line (and uncomment the 2nd)
+    //"repo": "https://github.com/brainglobe/cellfinder-core.git",
     "repo": "..",
 
     // The Python project's subdirectory in your repo.  If missing or
@@ -87,7 +90,7 @@
     //
     "matrix": {
         "req": {},
-        //     "napari": ["", null], // test with and without 
+        //     "napari": ["", null], // test with and without
         //     // "six": ["", null],  // test with and without six installed
         //     // "pip+emcee": [""]   // emcee is only available for install with pip.
         // },
