@@ -16,7 +16,7 @@ class PrepModels:
     params = ["resnet50_tv", "resnet50_all"]
 
     # increase default timeout to allow for download
-    timeout = 240
+    timeout = 480
 
     # Q for review:
     # - should I run only one sample ('number'=1)?
