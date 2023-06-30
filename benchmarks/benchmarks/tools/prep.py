@@ -1,8 +1,7 @@
 import shutil
 from pathlib import Path
 
-# NOTE: imlib to be replaced by brainglobe_utils
-from imlib.general.system import get_num_processes
+from brainglobe_utils.general.system import get_num_processes
 
 from cellfinder_core.tools.prep import (
     prep_classification,
