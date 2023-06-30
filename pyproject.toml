@@ -121,6 +121,7 @@ module = [
     "scipy.*",
     "skimage.*",
     "sklearn.*",
+    "cellfinder_core.tools.prep.*",
 ]
 ignore_missing_imports = true
 
@@ -128,7 +129,6 @@ ignore_missing_imports = true
 module = [
     "cellfinder_core.detect.*",
     "cellfinder_core.classify.*",
-    "cellfinder_core.tools.prep.*"
 ]
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
