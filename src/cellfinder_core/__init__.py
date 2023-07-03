@@ -1,6 +1,6 @@
 from importlib.metadata import PackageNotFoundError, version
 
-# Expose the tensorflow_installed flag to the rest of the package
+# Expose the _installed flag to the rest of the package
 from .tensorflow_handle import _TENSORFLOW_INSTALLED
 
 # Handle versioning

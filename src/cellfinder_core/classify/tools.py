@@ -2,13 +2,20 @@ import os
 from typing import List, Optional, Sequence, Tuple, Union
 
 import numpy as np
-import tensorflow as tf
-from tensorflow.keras import Model
 
 from cellfinder_core import logger
 from cellfinder_core.classify.resnet import build_model, layer_type
+from cellfinder_core.tensorflow_handle import (
+    _TENSORFLOW_INSTALLED,
+    tensorflow_required_function,
+)
+
+if _TENSORFLOW_INSTALLED:
+    import tensorflow as tf
+    from tensorflow.keras import Model
 
 
+@tensorflow_required_function
 def get_model(
     existing_model: Optional[os.PathLike] = None,
     model_weights: Optional[os.PathLike] = None,

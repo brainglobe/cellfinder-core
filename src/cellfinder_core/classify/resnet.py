@@ -1,20 +1,26 @@
 from typing import Callable, Dict, List, Literal, Optional, Tuple, Union
 
-from tensorflow import Tensor
-from tensorflow.keras import Model
-from tensorflow.keras.initializers import Initializer
-from tensorflow.keras.layers import (
-    Activation,
-    Add,
-    BatchNormalization,
-    Conv3D,
-    Dense,
-    GlobalAveragePooling3D,
-    Input,
-    MaxPooling3D,
-    ZeroPadding3D,
+from cellfinder_core.tensorflow_handle import (
+    _TENSORFLOW_INSTALLED,
+    tensorflow_required_function,
 )
-from tensorflow.keras.optimizers import Adam, Optimizer
+
+if _TENSORFLOW_INSTALLED:
+    from tensorflow import Tensor
+    from tensorflow.keras import Model
+    from tensorflow.keras.initializers import Initializer
+    from tensorflow.keras.layers import (
+        Activation,
+        Add,
+        BatchNormalization,
+        Conv3D,
+        Dense,
+        GlobalAveragePooling3D,
+        Input,
+        MaxPooling3D,
+        ZeroPadding3D,
+    )
+    from tensorflow.keras.optimizers import Adam, Optimizer
 
 #####################################################################
 # Define the types of ResNet
@@ -41,6 +47,7 @@ network_residual_bottleneck: Dict[layer_type, bool] = {
 #####################################################################
 
 
+@tensorflow_required_function
 def build_model(
     shape: Tuple[int, int, int, int] = (50, 50, 20, 2),
     network_depth: layer_type = "18-layer",
@@ -103,6 +110,7 @@ def get_resnet_blocks_and_bottleneck(
     return blocks, bottleneck
 
 
+@tensorflow_required_function
 def non_residual_block(
     inputs: Tensor,
     starting_features: int,
@@ -141,6 +149,7 @@ def non_residual_block(
     return x
 
 
+@tensorflow_required_function
 def residual_block(
     output_features: Tensor,
     resnet_unit_id: int,
@@ -285,6 +294,7 @@ def residual_block(
     return f
 
 
+@tensorflow_required_function
 def get_shortcut(
     inputs: Tensor,
     resnet_unit_label: int,

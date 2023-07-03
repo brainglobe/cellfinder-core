@@ -28,6 +28,7 @@ from sklearn.model_selection import train_test_split
 import cellfinder_core as program_for_log
 from cellfinder_core import logger
 from cellfinder_core.classify.resnet import layer_type
+from cellfinder_core.tensorflow_handle import tensorflow_required_function
 from cellfinder_core.tools.prep import DEFAULT_INSTALL_PATH
 
 tf_suppress_log_messages = [
@@ -297,6 +298,7 @@ def cli():
     )
 
 
+@tensorflow_required_function
 def run(
     output_dir,
     yaml_file,
