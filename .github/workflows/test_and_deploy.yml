@@ -68,6 +68,7 @@ jobs:
           python -m pip install git+$GITHUB_SERVER_URL/$GITHUB_REPOSITORY@$GITHUB_SHA
           # Install checked out copy of cellfinder
           python -m pip install .[tensorflow,dev]
+          pip list
 
 
       - name: Run cellfinder tests
