@@ -67,7 +67,7 @@ jobs:
           # Install latest SHA on this cellfinder-core branch
           python -m pip install git+$GITHUB_SERVER_URL/$GITHUB_REPOSITORY@$GITHUB_SHA
           # Install checked out copy of cellfinder
-          python -m pip install .[tensorflow,dev]
+          python -m pip install .[dev]
 
 
       - name: Run cellfinder tests
