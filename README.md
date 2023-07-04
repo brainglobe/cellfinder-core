@@ -52,13 +52,22 @@ N.B. To speed up cellfinder, you need CUDA & cuDNN installed. Instructions
 
 #### Conda Install
 `cellfinder-core` is available on `conda-forge`, however `tensorflow`, one of it's core dependencies, is not.
-As a result; you _must_ manually install `tensorflow` into your environment - whether you do this before or after `conda install`ing doesn't matter.
+As a result; you _must_ [manually install `tensorflow`](#manual-tensorflow-installations) into your environment - whether you do this before or after `conda install`ing doesn't matter.
 Once you are ready, install `cellfinder-core` into the desired environment via conda;
 ```sh
 conda install -c conda-forge cellfinder-core
 ```
 
-Please bear in mind that running the `conda install` command above will exit without failing even if `tensorflow` is not present; however `tensorflow` will not be installed as part of this process, and thus `cellfinder-core` will not be usable.
+Please also note that running the `conda install` command above will exit without failing, even if `tensorflow` is not present.
+However `tensorflow` will not be installed as part of this process, and thus `cellfinder-core` will not be usable - you will get `PackageNotFound` errors when attempting to import `cellfinder_core` if this is the case..
+
+#### **Manual `tensorflow` installations**
+We _strongly recommend_ that when installing, you let `pip` take care of fetching and installing `tensorflow` into your environment for you.
+However provided that there is a (compatible) version of `tensorflow` visible to the Python interpreter you wish to use, `cellfinder-core` will pick up on this version and use that.
+Currently, `cellfinder-core` requires `tensorflow>=2.5.0, <2.12.0`.
+
+If you are using the `conda` install, `tensorflow` will not be retrieved so you will need to build `tensorflow` yourself.
+In which case, please refer to the [`tensorflow` install page](https://www.tensorflow.org/install) for guidance.
 
 ### Usage
 Before using cellfinder-core, it may be useful to take a look at the
