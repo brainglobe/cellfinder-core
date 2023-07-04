@@ -37,7 +37,7 @@ Assuming you have a Python environment set up
 (e.g. [using conda](https://brainglobe.info/documentation/general/conda.html)),
 you can install `cellfinder-core` with:
 ```bash
-pip install cellfinder-core[tensorflow]
+pip install cellfinder-core
 ```
 
 Once you have [installed napari](https://napari.org/index.html#installation).
@@ -50,18 +50,9 @@ pip install cellfinder-napari
 N.B. To speed up cellfinder, you need CUDA & cuDNN installed. Instructions
 [here](https://brainglobe.info/documentation/general/gpu.html).
 
-#### **Manual `tensorflow` installations**
-We _strongly recommend_ that when installing, you let `pip` take care of fetching and installing `tensorflow` into your environment for you.
-If you would prefer to install `tensorflow` yourself, you can simply
-```bash
-pip install cellfinder-core
-```
-Please note that if you take this approach, you must make sure that your manual installation of `tensorflow` is visible to the same Python interpreter as `cellfinder-core`.
-`cellfinder-core` requires `tensorflow` at runtime, so if it cannot locate it you will start to get errors whenever you attempt to use `cellfinder` tools.
-
 #### Conda Install
 `cellfinder-core` is available on `conda-forge`, however `tensorflow`, one of it's core dependencies, is not.
-As a result; you _must_ [manually install `tensorflow`](#manual-tensorflow-installations) into your environment - whether you do this before or after `conda install`ing doesn't matter.
+As a result; you _must_ manually install `tensorflow` into your environment - whether you do this before or after `conda install`ing doesn't matter.
 Once you are ready, install `cellfinder-core` into the desired environment via conda;
 ```sh
 conda install -c conda-forge cellfinder-core
