@@ -1,1 +1,8 @@
-prune tests/data
+include README.md
+include LICENSE
+include pyproject.toml
+
+graft src
+
+prune benchmarks
+prune tests
