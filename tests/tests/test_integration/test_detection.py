@@ -5,7 +5,6 @@ import brainglobe_utils.IO.cells as cell_io
 import numpy as np
 import pytest
 from brainglobe_utils.general.system import get_num_processes
-from pytest_lazyfixture import lazy_fixture
 
 from cellfinder_core.main import main
 from cellfinder_core.tools.IO import read_with_dask
@@ -47,7 +46,10 @@ def background_array():
 @pytest.mark.slow
 @pytest.mark.parametrize(
     "n_free_cpus",
-    [lazy_fixture("no_free_cpus"), lazy_fixture("run_on_one_cpu_only")],
+    [
+        pytest.lazy_fixture("no_free_cpus"),
+        pytest.lazy_fixture("run_on_one_cpu_only"),
+    ],
 )
 def test_detection_full(signal_array, background_array, n_free_cpus):
     cells_test = main(
