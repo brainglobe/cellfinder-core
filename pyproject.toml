@@ -48,7 +48,7 @@ dev = [
     "pyinstrument",
     "pytest",
     "pytest-cov",
-    "pytest-lazyfixture",
+    "pytest-lazy-fixture",
     "pytest-mock",
     "pytest-timeout",
     "tox",
