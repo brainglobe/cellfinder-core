@@ -1,3 +1,4 @@
+import os
 from typing import Tuple
 
 import numpy as np
@@ -9,11 +10,19 @@ from cellfinder_core.tools.prep import DEFAULT_INSTALL_PATH
 
 
 @pytest.fixture(scope="session")
-def n_free_cpus() -> int:
+def no_free_cpus() -> int:
     """
     Set number of free CPUs while the tests are running.
     """
     return 0
+
+
+@pytest.fixture(scope="session")
+def run_on_one_cpu_only() -> int:
+    """
+    Set number of free CPUs while the tests are running.
+    """
+    return os.cpu_count() - 1
 
 
 @pytest.fixture(scope="session")
