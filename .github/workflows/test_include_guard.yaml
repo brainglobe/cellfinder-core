@@ -34,7 +34,7 @@ jobs:
             import cellfinder_core
 
       - name: Uninstall tensorflow
-        run: python -m pip uninstall tensorflow
+        run: python -m pip uninstall -y tensorflow
 
       - name: Test (broken) import
         id: broken_import
