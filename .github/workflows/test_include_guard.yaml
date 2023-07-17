@@ -45,8 +45,14 @@ jobs:
             import cellfinder_core
 
       # exit 1 will force an actions exit with a failure reported
-      - name: Check error was thrown by broken import
+      - name: Flag error thrown by broken import
         if: steps.broken_import.outputs.error == 'false'
         run: |
           echo "Broken import test result was: ${{ steps.broken_import.outputs.error }}"
           exit 1
+
+      # add an additional step to confirm an error occurred in the import
+      - name: Confirm error was thrown by broken import
+        if: steps.broken_import.outputs.error == 'true'
+        run: |
+          echo "Broken import test result was: ${{ steps.broken_import.outputs.error }}"
