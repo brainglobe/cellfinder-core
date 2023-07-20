@@ -31,7 +31,7 @@ To collate the benchmarks' results into a viewable website:
 ```
 $ asv publish
 ```
-This will create a tree of files in the `html` directory, but this cannot be viewed directly from the local filesystem, so we need to put them in a static site. `asv publish` also detects satistically significant decreases of performance, the results can be inspected in the 'Regression' tab of the static site (more on that on the next section).
+This will create a tree of files in the `html` directory, but this cannot be viewed directly from the local filesystem, so we need to put them in a static site. `asv publish` also detects satistically significant decreases of performance, the results can be inspected in the 'Regression' tab of the static site.
 
 To visualise the results in a static site:
 ```
@@ -41,7 +41,7 @@ To share the website on the internet, put the files in the `html` directory on a
 
 To put the results in the `gh-pages` branch and push them to GitHub:
 ```
-$asv gh-pages
+$ asv gh-pages
 ```
 
 ## Managing the results
@@ -51,18 +51,15 @@ To remove benchmarks from the database, for example, for a specific commit:
 ```
 $ asv rm commit_hash=a802047be
 ```
-See more options in the [documentation](https://asv.readthedocs.io/en/stable/using.html#managing-the-results-database).
 
 This will remove the selected results from the files in the `results` directory. To update the results in the static site, remember to run `publish` again!
 
+See more options for `asv rm` in the [asv documentation](https://asv.readthedocs.io/en/stable/using.html#managing-the-results-database).
 
 To compare the results of running the benchmarks on two commits:
 ```
 $ asv compare 88fbbc33 827f322b
 ```
-
-## Automatically detecting performance regressions
-
 
 
 ## Other handy commands
@@ -80,12 +77,18 @@ To use binary search to find a commit within the benchmarked range that produced
 ```
 $ asv find
 ```
+Note this will only find the global maximum if runtimes over the range are more-or-less monotonic. See the [asv docs](https://asv.readthedocs.io/en/stable/using.html#finding-a-commit-that-produces-a-large-regression) for further details.
 
 To check the validity of written benchmarks
 ```
 $ asv check
 ```
 
+`asv` has features to run a given benchmark in the Python standard profiler `cProfile`, and then visualise the results in the tool of your choice. For example:
+```
+$ asv profile time_units.time_very_simple_unit_parse 10fc29cb
+```
+See the [asv docs on profiling](https://asv.readthedocs.io/en/stable/using.html#running-a-benchmark-in-the-profiler) for further details
 
 ## Development notes:
 In development, the following flags to `asv run` are often useful:
