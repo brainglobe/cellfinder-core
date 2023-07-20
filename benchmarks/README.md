@@ -6,7 +6,7 @@ pip install asv
 
 `asv` works roughly as follows:
 1. It creates a virtual environment (as defined in the config)
-2. It installs the software package version of a specific commit
+2. It installs the software package version of a specific commit (or of a local commit)
 3. It times the benchmarking tests and saves the results to json files
 4. The json files are 'published' into an html dir
 5. The html dir can be visualised in a static website
@@ -78,7 +78,6 @@ $ asv show
 
 To use binary search to find a commit within the benchmarked range that produced a large regression
 ```
-$ asv check
 $ asv find
 ```
 
@@ -117,39 +116,29 @@ To use the local repository, use:
 
 ### setup and setup_cache
 
-Setup includes initialisation bits that should not be included
-in the timing of the benchmark.
-
-It can be added as:
+- `setup` includes initialisation bits that should not be included
+in the timing of the benchmark. It can be added as:
     - a method of a class, or
     - an attribute of a free function, or
     - a module-level setup function (run for every benchmark in the
     module, prior to any function-specific setup)
 
-If setup raises `NotImplementedError`, the benchmark is skipped
+    If `setup` raises `NotImplementedError`, the benchmark is skipped
 
-`setup_cache` only performs the setup calculation once
+- `setup_cache` only performs the setup calculation once
 (for each benchmark and each repeat) and caches the
-result to disk. This may be useful if the setup is
+result to disk. This may be useful if the setup is computationally
 expensive.
 
-A separate cache is used for each environment and each commit.
-The cache is thrown out between benchmark runs.
+    A separate cache is used for each environment and each commit. The cache is thrown out between benchmark runs.
 
-There are two options to persist the data for the benchmarks:
-- `setup_cache` returns a data structure, which asv pickles to disk,
-    and then loads and passes as first arg to each benchmark (not
-    automagically tho), or
-- `setup_cache` saves files to the cwd (which is a temp dir managed by
-    asv), which are then explicitly loaded in each benchmark. Recomm
-    practice is to actually read the data in a `setup` fn, so that
-    loading time is not part of the timing
+    There are two options to persist the data for the benchmarks:
+    - `setup_cache` returns a data structure, which asv pickles to disk,
+        and then loads and passes as the first argument to each benchmark (not
+        automagically though), or
+    - `setup_cache` saves files to the cwd (which is a temp dir managed by
+        asv), which are then explicitly loaded in each benchmark. The recommended practice is to actually read the data in a `setup` function, so that loading time is not part of the benchmark timing.
 
-### Check benchmarks
-To check the validity of written benchmarks
-```
-$ asv check
-```
 
 
 ----
