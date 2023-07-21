@@ -31,7 +31,7 @@ To collate the benchmarks' results into a viewable website:
 ```
 $ asv publish
 ```
-This will create a tree of files in the `html` directory, but this cannot be viewed directly from the local filesystem, so we need to put them in a static site. `asv publish` also detects satistically significant decreases of performance, the results can be inspected in the 'Regression' tab of the static site.
+This will create a tree of files in the `html` directory, but this cannot be viewed directly from the local filesystem, so we need to put them in a static site. `asv publish` also detects statistically significant decreases of performance, the results can be inspected in the 'Regression' tab of the static site.
 
 To visualise the results in a static site:
 ```
