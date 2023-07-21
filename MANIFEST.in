@@ -12,4 +12,4 @@ graft src
 prune benchmarks
 prune tests
 
-exclude cellfinder-core/benchmarks/*
+prune cellfinder-core/benchmarks/
