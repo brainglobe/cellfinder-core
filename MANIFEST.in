@@ -11,5 +11,3 @@ graft src
 
 prune benchmarks
 prune tests
-
-prune cellfinder-core/benchmarks/
