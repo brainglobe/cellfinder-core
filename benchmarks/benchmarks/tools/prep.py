@@ -12,36 +12,33 @@ from cellfinder_core.tools.prep import (
 
 
 class PrepModels:
+    # parameters to sweep across
     param_names = ["model_name"]
     params = ["resnet50_tv", "resnet50_all"]
 
     # increase default timeout to allow for download
-    timeout = 480
+    timeout = 600
 
-    # Q for review:
-    # - should I run only one sample ('number'=1)?
-    #   'number' as defined here:
-    #    https://asv.readthedocs.io/en/stable/writing_benchmarks.html#timing
-    # - how are prep_classification and prep_training different?
+    # install path
+    def benchmark_install_path(self):
+        # also allow to run as "user" on GH actions?
+        return Path(Path.home() / ".cellfinder-benchmarks")
 
     def setup(self, model_name):
-        self.n_free_cpus = 2  # TODO: should this be parametrised??
+        self.n_free_cpus = 2
         self.n_processes = get_num_processes(
             min_free_cpu_cores=self.n_free_cpus
         )
         self.trained_model = None
         self.model_weights = None
-        self.install_path = Path.home() / ".cellfinder"
+        self.install_path = self.benchmark_install_path()
         self.model_name = model_name
 
-        # remove .cellfinder dir if it exists already
+        # remove .cellfinder-benchmarks dir if it exists
         shutil.rmtree(self.install_path, ignore_errors=True)
-        # Q for review:
-        # - is this safe?
-        # - should I check if install_path is the expected path?
 
     def teardown(self, model_name):
-        # remove .cellfinder dir after benchmarks
+        # remove .cellfinder-benchmarks dir after benchmarks
         shutil.rmtree(self.install_path)
 
     def time_prep_models(self, model_name):
@@ -73,7 +70,7 @@ class PrepModels:
 
 class PrepTF:
     def setup(self):
-        n_free_cpus = 2  # TODO: should we parametrise this?
+        n_free_cpus = 2
         self.n_processes = get_num_processes(min_free_cpu_cores=n_free_cpus)
 
     def time_prep_tensorflow(self):
