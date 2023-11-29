@@ -27,13 +27,13 @@ jobs:
       matrix:
         # Run all supported Python versions on linux
         os: [ubuntu-latest]
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.9", "3.10", "3.11"]
         # Include one windows, one macos run
         include:
         - os: macos-latest
-          python-version: "3.9"
+          python-version: "3.11"
         - os: windows-latest
-          python-version: "3.9"
+          python-version: "3.11"
 
     steps:
       - name: Cache tensorflow model
@@ -64,10 +64,10 @@ jobs:
         with:
           repository: 'brainglobe/cellfinder'
 
-      - name: Set up Python 3.10
+      - name: Set up Python 3.11
         uses: actions/setup-python@v3
         with:
-          python-version: "3.10"
+          python-version: "3.11"
 
       - name: Install test dependencies
         run: |
