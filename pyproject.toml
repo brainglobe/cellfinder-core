@@ -11,9 +11,9 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Topic :: Scientific/Engineering :: Image Recognition",
 ]
 requires-python = ">=3.8"
@@ -71,12 +71,6 @@ include-package-data = true
 
 [tool.setuptools_scm]
 
-[tool.cibuildwheel]
-build = "cp38-* cp39-* cp310-*"
-
-[tool.cibuildwheel.macos]
-archs = ["x86_64", "arm64"]
-
 [tool.pytest.ini_options]
 addopts = "--cov=cellfinder_core --cov-report=xml"
 filterwarnings = [
@@ -94,7 +88,7 @@ markers = [
 log_level = "WARNING"
 
 [tool.black]
-target-version = ['py38', 'py39', 'py310']
+target-version = ['py39', 'py310', 'py311']
 skip-string-normalization = false
 line-length = 79
 
