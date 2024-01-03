@@ -1,3 +1,10 @@
+from warnings import warn
+
+warn(
+    f"cellfinder-core has merged with it's napari plugin and is now available as a combined package. To remain up to date, please install cellfinder: https://github.com/brainglobe/cellfinder",
+    DeprecationWarning,
+)
+
 from importlib.metadata import PackageNotFoundError, version
 
 try:
